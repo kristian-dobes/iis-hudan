@@ -28,6 +28,7 @@ def login(request):
         username = request.POST['username']
         password = request.POST['password']
         if user_login(request, username, password):
+            print("Logged in.")
             return redirect('home')
         else:
             return render(request, 'login.html', {'error': 'Uživatel neexistuje'})
@@ -39,5 +40,7 @@ def logout(request):
     return redirect('home')
 
 def home(request):
+    print("Redirected to home!")
     groups = group_get_all(request)
+    print("Got all groups.")
     return render(request, 'home.html', {'groups': groups})
