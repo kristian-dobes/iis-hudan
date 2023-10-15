@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row">
+
+        <!-- Groups List on the left -->
+        <div class="col-md-3">
+            
+        </div>
+
+        <!-- Currently loaded group in the middle -->
+        <div class="col-md-6">
+            <h3>Skupiny</h3>
+            <ul class="list-group">
+                {% for group in groups %}
+                <li class="list-group-item">
+                    <a href="{% url 'groups:detail' group.id %}">
+                        <img src="{{ group.image_url }}" class="img-fluid rounded-circle" alt="{{ group.title }}"
+                            style="max-width: 50px;">
+                        {{ group.title }}</a>
+                </li>
+                {% endfor %}
+                <li class="list-group-item">
+                    <a href="{% url 'groups:create' %}" class="btn btn-primary btn-block">Vytvořit skupinu</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Empty space on the right (can be used for something else in the future) -->
+        <div class="col-md-3"></div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {% if not profile %}
+            <div class="alert alert-danger" role="alert">
+                Uživatel neexistuje.
+            </div>
+            {% else %}
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ profile.username }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img src="{{ profile.profile_picture_url }}" class="img-fluid rounded-circle"
+                                alt="{{ profile.username }}" style="max-width: 150px;">
+                        </div>
+                        <div class="col-md-8">
+                            <h4 class="mb-3">Bio:</h4>
+                            <p>{{ profile.bio }}</p>
+                        </div>
+                    </div>
+                    <!-- Edit button -->
+                    {% if current_user == profile %}
+                    <div class="row justify-content-center mt-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'users:edit' %}" class="btn btn-primary btn-block">Upravit profil</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
