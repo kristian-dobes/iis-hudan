@@ -1,0 +1,354 @@
+{% extends "base.html" %} {%load static%} {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      {% if not thread %}
+      <div class="alert alert-danger" role="alert">Vlákno neexistuje.</div>
+      {% else %}
+      <div class="card text-channel">
+        <div class="card-header">
+          <h3>{{ thread.title }}</h3>
+        </div>
+        <div class="card-body message-list">
+          {% if posts %} {% for post in posts %}
+          <div class="message" id="message-{{ post.id }}">
+            <div class="message-avatar">
+              <!-- Optional: You can include an avatar image here -->
+              <img
+                src="{{ post.author.image_url }}"
+                alt="{{ post.author.username }}"
+              />
+            </div>
+            <div class="message-content">
+              <strong>
+                <a
+                  href="{% url 'users:detail' user_id=post.author.id %}"
+                  class="message-author"
+                >
+                  {{ post.author.username }}
+                </a>
+              </strong>
+              <p class="message-text">{{ post.content }}</p>
+            </div>
+            <div class="message-likes">
+              <button
+                class="btn btn-primary btn-sm message-like-button"
+                id="likeButton-{{ post.id }}"
+              >
+                <img
+                  src="{% static '/img/like_up.png' %}"
+                  alt="Like"
+                  class="btn-like"
+                />
+              </button>
+              <span id="likeCountUp-{{ post.id }}">{{ post.likes_up }}</span>
+              <button
+                class="btn btn-primary btn-sm message-dislike-button"
+                id="dislikeButton-{{ post.id }}"
+              >
+                <img
+                  src="{% static '/img/like_down.png' %}"
+                  alt="Dislike"
+                  class="btn-like"
+                />
+              </button>
+              <span id="likeCountDown-{{ post.id }}"
+                >{{ post.likes_down }}</span
+              >
+            </div>
+          </div>
+
+          {% endfor %} {% else %}
+          <div class="alert alert-info" role="alert" id="no-messages-yet">
+            Žádné zprávy.
+          </div>
+          {% endif %}
+        </div>
+        <div class="card-footer">
+          <textarea
+            id="messageInput"
+            class="form-control"
+            placeholder="Type a message..."
+            rows="2"
+          ></textarea>
+          <button id="sendButton" class="btn btn-primary mt-2">Send</button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  let shownMessages = {};
+
+  document.addEventListener("DOMContentLoaded", (event) => {
+    document
+      .getElementById("sendButton")
+      .addEventListener("click", function () {
+        const messageContent = document.getElementById("messageInput").value;
+        if (messageContent.trim() !== "") {
+          fetch(
+            '{% url "groups:threads:post" group_id=group.id thread_id=thread.id %}',
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/x-www-form-urlencoded; charset=UTF-8",
+                "X-CSRFToken": "{{ csrf_token }}",
+              },
+              body: new URLSearchParams({
+                content: messageContent,
+              }),
+            }
+          )
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  "Network response was not ok " + response.statusText
+                );
+              }
+              return response.text();
+            })
+            .then((data) => {
+              document.getElementById("messageInput").value = ""; // Clear the text area
+              showMessages(data);
+            })
+            .catch((error) => {
+              console.error("An error occurred: ", error);
+            });
+        }
+      });
+
+    // Fill shownMessages with already shown messages
+    let messageElements = document.querySelectorAll(".message");
+    for (let messageElement of messageElements) {
+      let id = messageElement.id.split("-")[1];
+      shownMessages[id] = true;
+    }
+
+    // Call fetchMessages every second
+    // setInterval(fetchMessages, 1000);
+    let messageList = document.querySelector(".message-list");
+    messageList.scrollTop = messageList.scrollHeight;
+    fetchMessages();
+
+    // Like button
+    let likeButtons = document.querySelectorAll(".message-like-button");
+    for (let likeButton of likeButtons) {
+      likeButton.addEventListener("click", function () {
+        let id = likeButton.id.split("-")[1];
+        likePost(id, 1);
+      });
+    }
+
+    // Dislike button
+    let dislikeButtons = document.querySelectorAll(".message-dislike-button");
+    for (let dislikeButton of dislikeButtons) {
+      dislikeButton.addEventListener("click", function () {
+        let id = dislikeButton.id.split("-")[1];
+        likePost(id, -1);
+      });
+    }
+  });
+
+  function likePost(id, val) {
+    fetch(
+      '{% url "groups:threads:like" group_id=group.id thread_id=thread.id post_id=0 %}'.replace(
+        "0",
+        id
+      ),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: new URLSearchParams({
+          post_id: id,
+          value: val,
+        }),
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+        return response.text();
+      })
+      .then((data) => {})
+      .catch((error) => {
+        console.error("An error occurred: ", error);
+      });
+  }
+
+  function fetchMessages() {
+    fetch(
+      '{% url "groups:threads:post" group_id=group.id thread_id=thread.id %}',
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+        return response.text();
+      })
+      .then((data) => {
+        showMessages(data);
+        fetchMessages();
+      })
+      .catch((error) => {
+        console.error("An error occurred: ", error);
+        fetchMessages();
+      });
+  }
+
+  function showMessages(data) {
+    let messages = JSON.parse(data);
+    if (messages.length > 0) {
+      let noMessagesYet = document.getElementById("no-messages-yet");
+      if (noMessagesYet) {
+        noMessagesYet.remove();
+      }
+    }
+    let messageList = document.querySelector(".message-list");
+    for (let message of messages) {
+      if (message.id in shownMessages) {
+        // update like count
+        let likeCount = document.getElementById("likeCountUp-" + message.id);
+        likeCount.innerHTML = message.likes_up;
+        likeCount = document.getElementById("likeCountDown-" + message.id);
+        likeCount.innerHTML = message.likes_down;
+        continue;
+      }
+      shownMessages[message.id] = true;
+      let messageElement = document.createElement("div");
+      messageElement.classList.add("message");
+      messageElement.innerHTML = `
+        <div class="message-avatar">
+          <img src="${message.author_profile_picture_url}" alt="${message.author}" />
+        </div>
+        <div class="message-content">
+          <strong>
+            <a href="/users/${message.author_id}" class="message-author">
+              ${message.author}
+            </a>
+          </strong>
+          <p class="message-text">${message.content}</p>
+        </div>
+        <div class="message-likes">
+          <button
+            class="btn btn-primary btn-sm message-like-button"
+            id="likeButton-${message.id}"
+          >
+            <img
+              src="/static/img/like_up.png"
+              alt="Like"
+              class="btn-like"
+            />
+          </button>
+          <span id="likeCountUp-${message.id}">${message.likes_up}</span>
+          <button
+            class="btn btn-primary btn-sm message-dislike-button"
+            id="dislikeButton-${message.id}"
+          >
+            <img
+              src="/static/img/like_down.png"
+              alt="Dislike"
+              class="btn-like"
+            />
+          </button>
+          <span id="likeCountDown-${message.id}">${message.likes_down}</span>
+        </div>
+      `;
+      messageList.appendChild(messageElement);
+      let likeButton = messageElement.querySelector(".message-like-button");
+      likeButton.addEventListener("click", function () {
+        let id = likeButton.id.split("-")[1];
+        likePost(id, 1);
+      });
+      let dislikeButton = messageElement.querySelector(
+        ".message-dislike-button"
+      );
+      dislikeButton.addEventListener("click", function () {
+        let id = dislikeButton.id.split("-")[1];
+        likePost(id, -1);
+      });
+    }
+    messageList.scrollTop = messageList.scrollHeight;
+  }
+</script>
+
+<style>
+  .text-channel {
+    display: flex;
+    flex-direction: column;
+    height: 650px;
+  }
+
+  .message-list {
+    overflow-y: scroll;
+    flex-grow: 1;
+    padding: 10px;
+  }
+
+  .message {
+    margin-bottom: 10px;
+  }
+
+  .message strong {
+    display: block;
+  }
+
+  .message {
+    display: flex;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+
+  .message-avatar {
+    margin-right: 10px;
+  }
+
+  .message-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .message-content {
+    flex-grow: 1;
+  }
+
+  .message-author {
+    color: #7289da;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .message-author:hover {
+    text-decoration: underline;
+  }
+
+  .message-text {
+    margin: 2px 0;
+    color: #dcddde;
+  }
+
+  .btn-like {
+    width: 20px;
+    height: 20px;
+  }
+
+  .message-like-button,
+  .message-dislike-button {
+    margin-left: 10px;
+  }
+</style>
+{% endblock %}

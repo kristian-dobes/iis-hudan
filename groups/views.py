@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
-from .services import group_create, group_get_by_id, group_edit
+from .services import group_create, group_get_by_id, group_edit, group_get_threads, group_is_user_administrator
 from users.services import user_current
 
 # Create your views here.
 def detail(request, group_id):
     group = group_get_by_id(request, group_id)
-    return render(request, 'groups/group_detail.html', {'group': group})
+    threads = group_get_threads(request, group_id)
+    is_user_admin = group_is_user_administrator(request, group_id, user_current(request))
+    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin})
 
 def edit(request, group_id):
     if request.method == 'POST':
@@ -27,6 +29,8 @@ def edit(request, group_id):
     return render(request, 'groups/edit_group.html', {'group': group})
 
 def create(request):
+    if user_current(request) is None:
+        return redirect('users:login')
     if request.method == 'POST':
         name = request.POST['name']
         image_url = request.POST['image_url']
