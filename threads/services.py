@@ -104,7 +104,7 @@ def post_like(request, user, post, value):
             print("Post like not created: %s" % exception)
             return None
     except Exception as exception:
-        # print exception
+        # print exception 
         print("Post like not updated: %s" % exception)
         return None
 
