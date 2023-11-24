@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <!-- Display error message if exists -->
+      {% if error %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+      {% endif %}
+
+      <h1 class="mb-4">Edit {{ current_user.username }}'s profile</h1> {% comment %}TODO better title{% endcomment %}
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- User profile Name -->
+        <div class="form-user">
+          <label for="name">User:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            value="{{ current_user.username }}"
+          />
+        </div>
+
+        <!-- User Image URL -->
+        <div class="form-profile mt-3">
+          <label for="image_url">Image URL:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="image_url"
+            name="image_url"
+            value="{{ current_user.profile_picture_url }}"
+          />
+        </div>
+
+        <!-- User Bio -->
+        <div class="form-proifle mt-3">
+          <label for="bio">Bio:</label>
+          <textarea
+            class="form-control"
+            id="bio"
+            name="bio"
+            rows="4"
+            value="{{ current_user.bio }}"
+          >
+{{ current_user.bio }}</textarea
+          >
+        </div>
+
+        <div class="form-profile mt-3">
+          <input type="submit" class="btn btn-primary" value="Save profile changes" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
