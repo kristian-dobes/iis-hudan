@@ -33,6 +33,15 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{% url 'home' %}">Home</a>
                 </li>
+                {% if current_user.is_admin %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'users:list_users' %}">Users</a>
+
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'groups:list_groups' %}">Groups</a> 
+                </li>
+                {% endif %}
             </ul>
         </div>
         <div class="">

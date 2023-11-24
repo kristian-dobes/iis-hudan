@@ -1,6 +1,6 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.sessions.models import Session
-from .models import Group
+from groups.models import Group
 from threads.models import Thread
 from users.services import user_current
 
@@ -55,4 +55,14 @@ def group_is_user_administrator(request, group_id, user):
         group = Group.objects.get(id=group_id)
         return group.administrators.filter(id=user.id).exists() or group.owner == user
     except:
+        return False
+    
+def group_remove(request, group_id):
+    print("here?")
+    try:
+        group = Group.objects.get(id=group_id)
+        group.delete()
+        print("deleted")
+        return True
+    except Group.DoesNotExist:
         return False
