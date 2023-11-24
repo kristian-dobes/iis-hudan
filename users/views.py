@@ -3,20 +3,22 @@ from .models import Profile
 from .services import user_get_by_id, user_remove
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from .services import user_get_by_id, verify_password
 
 def detail(request, user_id):
     user = user_get_by_id(request, user_id)
     return render(request, 'users/user_detail.html', {'profile': user})
 
-def edit(request):
+def edit(request, user_id):
     if request.method == 'POST':
         user = user_get_by_id(request, request.session['user_id'])
         user.username = request.POST['username']
+        user.profile_picture_url = request.POST['image_url']
+        user.bio = request.POST['bio']
         user.save()
-        return redirect('detail', user_id=user.id)
+        return redirect('users:detail', user_id=user.id)
     else:
-        return render(request, 'users/edit.html')
-
+        return render(request, 'users/edit_user.html')
 
 def list_users(request):
     search_query = request.GET.get('search', '')
@@ -36,3 +38,17 @@ def delete_user(request, user_id):
         profiles = Profile.objects.all()
         return render(request, 'users/all_users.html', {'profiles': profiles})
     return render(request, 'users/confirm_delete.html', {'profile': profile})
+
+    
+def change_password(request, user_id):
+    if request.method == 'POST':
+        user = user_get_by_id(request, request.session['user_id'])
+        # TODO doesnt work, needs adjustments, needs to be hashed? 
+        if verify_password(user.password, request.POST['old_password']):
+            user.password = request.POST['password']
+            user.save()
+            return redirect('users:detail', user_id=user.id)
+        else:
+            return render(request, 'users/change_password.html', {'error': 'Špatné heslo'})
+    else:
+        return render(request, 'users/change_password.html')
