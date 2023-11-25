@@ -15,7 +15,7 @@
             <div class="message-avatar">
               <!-- Optional: You can include an avatar image here -->
               <img
-                src="{{ post.author.image_url }}"
+                src="{{ post.author.profile_picture_url }}"
                 alt="{{ post.author.username }}"
               />
             </div>
@@ -73,18 +73,26 @@
           </div>
           {% endif %}
         </div>
-        {% if current_user %}
+
+        {% if current_user in group.members.all or current_user.is_admin or current_user.id is group.owner.id %}
           <div class="card-footer">
             <textarea id="messageInput" class="form-control" placeholder="Type a message..." rows="2"></textarea>
             <button id="sendButton" class="btn btn-primary mt-2">Send</button>
           </div>
-        {% else %}
+        {% elif current_user %}
           <div class="card-footer">
             <div class="alert alert-info" role="alert">
-              Pro psaní zpráv se musíte <a href="{% url 'login' %}">přihlásit</a>
+              Pro psaní zpráv musíte být členem skupiny
             </div>
           </div>
+        {% else %}
+        <div class="card-footer">
+          <div class="alert alert-info" role="alert">
+            Nemáte právo pro psaní zpráv. Zkuste se <a href="{% url 'login' %}">přihlásit</a>
+          </div>
+        </div>
         {% endif %}
+
       </div>
       {% endif %}
     </div>
@@ -94,8 +102,8 @@
 {% comment %} Simple JavaScript code to send a message when the user presses Enter key: {% endcomment %}
 <script>
   document.getElementById('messageInput').addEventListener('keypress', function(event) {
-      if (event.key === 'Enter') {
-          event.preventDefault(); // Prevents the default action of Enter key (new line)
+      if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault(); // Prevents the default action of Enter key (sending message)
           document.getElementById('sendButton').click(); // Triggers click on the send button
       }
   });
