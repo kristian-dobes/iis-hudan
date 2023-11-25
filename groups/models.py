@@ -9,6 +9,8 @@ class Group(models.Model):
     image_url = models.CharField(max_length=200)
     description = models.CharField(max_length=1024)
     moderators = models.ManyToManyField(Profile, related_name="moderators")
+    requested_to_join = models.ManyToManyField(Profile, related_name="requested_to_join")
+    members = models.ManyToManyField(Profile, related_name="members")
     
     # Visibility choices
     VISIBILITY_CHOICES = [

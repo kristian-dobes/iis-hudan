@@ -6,12 +6,12 @@ from threads.models import Thread
 from users.services import user_current
 
 
-def group_create(request, name, image_url, description):
+def group_create(request, name, image_url, description, content_visibility):
     try:
         user = user_current(request)
         if user is None:
             raise Exception('User is not logged in')
-        group = Group.objects.create(title=name, image_url=image_url, description=description, owner=user)
+        group = Group.objects.create(title=name, image_url=image_url, description=description, owner=user, content_visibility=content_visibility)
         return group.id
     except:
         return None
@@ -108,6 +108,47 @@ def remove_moderator(request, group_id, user_id):
         user = Profile.objects.get(id=user_id)
         group = Group.objects.get(id=group_id)
         group.moderators.remove(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
+
+def add_memb_request(request, group_id, user_id):
+    try:
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.requested_to_join.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
+    
+def remove_memb_request(request, group_id, user_id):
+    try:
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.requested_to_join.remove(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
+    
+def add_member(request, group_id, user_id):
+    try:
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.requested_to_join.remove(user)
+        group.members.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
+    
+def remove_member(request, group_id, user_id):
+    try:
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.members.remove(user)
         group.save()
         return True
     except (Profile.DoesNotExist, Group.DoesNotExist):

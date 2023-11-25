@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .services import group_create, group_get_by_id, group_edit, group_get_threads, group_is_user_administrator, group_remove, add_mod_request, remove_mod_request, add_moderator, remove_moderator
+from .services import group_create, group_get_by_id, group_edit, group_get_threads, group_is_user_administrator, group_remove, add_mod_request, remove_mod_request, add_moderator, remove_moderator, add_memb_request, remove_memb_request, add_member, remove_member
 from users.services import user_current, user_is_logged, user_get_by_id
 from threads.services import  thread_get_by_id
 from .models import Group
@@ -19,6 +19,12 @@ def edit(request, group_id):
         image_url = request.POST['image_url']
         description = request.POST['description']
         content_visibility = request.POST['content_visibility']
+        delete_group = request.POST.get('delete_group', False)
+        
+        if delete_group:
+            group_remove(request, group_id)
+            return redirect('home')
+        
         edited_id = group_edit(request, group_id, name, image_url, description, content_visibility)
         if edited_id is None:
         # show group detail with error message
@@ -43,7 +49,8 @@ def create(request):
         name = request.POST['name']
         image_url = request.POST['image_url']
         description = request.POST['description']
-        created_id = group_create(request, name, image_url, description)
+        visibility = request.POST['content_visibility']
+        created_id = group_create(request, name, image_url, description, visibility)
         if created_id is None:
             return render(request, 'groups/create_group.html', {'error': 'Chyba při vytváření skupiny'})
         else:
@@ -101,3 +108,27 @@ def delete_moderator(request, group_id, user_id):
     remove_moderator(request, group.id, user.id)
     return detail(request, group_id)
 
+# Members
+def add_member_request(request, group_id, user_id):
+    group = group_get_by_id(request, group_id)
+    user = user_get_by_id(request, user_id)
+    add_memb_request(request, group.id, user.id)
+    return detail(request, group_id)
+
+def approve_member_request(request, group_id, user_id):
+    group = group_get_by_id(request, group_id)
+    user = user_get_by_id(request, user_id)
+    add_member(request, group.id, user.id)
+    return detail(request, group_id)
+
+def reject_member_request(request, group_id, user_id):
+    group = group_get_by_id(request, group_id)
+    user = user_get_by_id(request, user_id)
+    remove_memb_request(request, group.id, user.id)
+    return detail(request, group_id)
+
+def delete_member(request, group_id, user_id):
+    group = group_get_by_id(request, group_id)
+    user = user_get_by_id(request, user_id)
+    remove_member(request, group.id, user.id)
+    return detail(request, group_id)
