@@ -1,26 +1,24 @@
 from django.shortcuts import render, redirect
 from .services import group_create, group_get_by_id, group_edit, group_get_threads, group_is_user_administrator, group_remove
-from users.services import user_current, user_get_by_id
+from users.services import user_current, user_is_logged
 from .models import Group
 
 # Create your views here.
 def detail(request, group_id):
     user = user_current(request)
-    print("detail")
     group = group_get_by_id(request, group_id)
     threads = group_get_threads(request, group_id)
     is_user_admin = group_is_user_administrator(request, group_id, user) 
-    print(user.is_admin)
-    print(is_user_admin)
-    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin})
+    is_user_logged = user_is_logged(request)
+    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged})
 
 def edit(request, group_id):
-    print("In edit")
     if request.method == 'POST':
         name = request.POST['name']
         image_url = request.POST['image_url']
         description = request.POST['description']
-        edited_id = group_edit(request, group_id, name, image_url, description)
+        content_visibility = request.POST['content_visibility']
+        edited_id = group_edit(request, group_id, name, image_url, description, content_visibility)
         if edited_id is None:
         # show group detail with error message
             group = group_get_by_id(request, group_id)
@@ -33,8 +31,6 @@ def edit(request, group_id):
     
     #is_user_admin = group_is_user_administrator(request, group_id, user_current(request))
     #if group == None or (group.owner != user and not is_user_admin):
-    print("why not here?\n")
-    print(user.is_admin)
     if group == None or (group.owner != user and not user.is_admin):
         return redirect('groups:detail', group_id=group_id)
     return render(request, 'groups/edit_group.html', {'group': group})
