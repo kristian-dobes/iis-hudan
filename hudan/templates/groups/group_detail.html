@@ -39,6 +39,64 @@
           {% endif %}
         </div>
       </div>
+
+      {% if group and not current_user.is_admin and not current_user == group.owner and current_user not in group.requested_for_moderator.all and current_user not in group.moderators.all %}
+      <div class="container mt-5">
+        <h2>Become Moderator</h2>
+        <form method="post" action="{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">Send Request</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+
+      {% if group and not current_user.is_admin and not current_user == group.owner and current_user in group.requested_for_moderator.all and current_user not in group.moderators.all %}
+      <div class="container mt-5">
+        <h2>Become Moderator</h2>
+        <form method="post" action="{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <button type="submit" disabled class="btn btn-primary btn-block">Send Request</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+
+      {% if current_user.is_admin or current_user == group.owner %}
+      <div class="container mt-5">
+        <h2>Moderator Requests</h2>
+        {% if group.requested_for_moderator.all %}
+          <ul class="list-group">
+            {% for requester in group.requested_for_moderator.all %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ requester.username }}
+                <div>
+                  <a href="{% url 'groups:approve_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-success btn-sm">Approve</a>
+                  <a href="{% url 'groups:reject_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-danger btn-sm">Reject</a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="alert alert-info" role="alert">No moderator requests.</div>
+        {% endif %}
+      </div>
+      {% endif %}
+      
+      <h2>List of Moderators</h2>
+      <ul>
+        {% for mod in group.moderators.all %}
+            <li>
+                {{ mod.username }}
+                <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id%}">Remove</a>
+            </li>
+        {% empty %}
+            <li>No moderators found.</li>
+        {% endfor %}
+    </ul>
+
       {%if is_user_admin%}
       <div class="container mt-5">
         <h2>Vytvořit vlákno</h2>

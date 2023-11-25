@@ -10,15 +10,17 @@ def detail(request, user_id):
     return render(request, 'users/user_detail.html', {'profile': user})
 
 def edit(request, user_id):
+    print(user_id)
     if request.method == 'POST':
         user = user_get_by_id(request, request.session['user_id'])
         user.username = request.POST['username']
         user.profile_picture_url = request.POST['image_url']
         user.bio = request.POST['bio']
         user.save()
-        return redirect('users:detail', user_id=user.id)
+        return redirect('users:detail', user_id=user.id )
     else:
-        return render(request, 'users/edit_user.html')
+        user = user_get_by_id(request, user_id)
+        return render(request, 'users/edit_user.html', {'profile': user})
 
 def list_users(request):
     search_query = request.GET.get('search', '')

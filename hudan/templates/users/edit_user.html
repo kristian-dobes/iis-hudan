@@ -8,7 +8,7 @@
       <div class="alert alert-danger" role="alert">{{ error }}</div>
       {% endif %}
 
-      <h1 class="mb-4">Edit {{ current_user.username }}'s profile</h1> {% comment %}TODO better title{% endcomment %}
+      <h1 class="mb-4">Edit {{ profile.username }}'s profile</h1> {% comment %}TODO better title{% endcomment %}
 
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -21,7 +21,7 @@
             class="form-control"
             id="username"
             name="username"
-            value="{{ current_user.username }}"
+            value="{{ profile.username }}"
           />
         </div>
 
@@ -33,7 +33,7 @@
             class="form-control"
             id="image_url"
             name="image_url"
-            value="{{ current_user.profile_picture_url }}"
+            value="{{ profile.profile_picture_url }}"
           />
         </div>
 
@@ -45,9 +45,9 @@
             id="bio"
             name="bio"
             rows="4"
-            value="{{ current_user.bio }}"
+            value="{{ profile.bio }}"
           >
-{{ current_user.bio }}</textarea
+{{ profile.bio }}</textarea
           >
         </div>
 

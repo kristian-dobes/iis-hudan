@@ -1,6 +1,7 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.sessions.models import Session
 from groups.models import Group
+from users.models import Profile
 from threads.models import Thread
 from users.services import user_current
 
@@ -53,7 +54,7 @@ def group_get_threads(request, group_id):
 def group_is_user_administrator(request, group_id, user):
     try:
         group = Group.objects.get(id=group_id)
-        return group.administrators.filter(id=user.id).exists() or group.owner == user
+        return group.moderators.filter(id=user.id).exists() or group.owner == user
     except:
         return False
     
@@ -65,4 +66,48 @@ def group_remove(request, group_id):
         print("deleted")
         return True
     except Group.DoesNotExist:
+        return False
+
+def add_mod_request(request, group_id, user_id):
+    print("add_request")
+    try:
+        print(user_id)
+        print(group_id)
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.requested_for_moderator.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
+    
+def add_moderator(request, group_id, user_id):
+    try:
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.requested_for_moderator.remove(user)
+        group.moderators.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
+    
+def remove_mod_request(request, group_id, user_id):
+    try:
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.requested_for_moderator.remove(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
+    
+def remove_moderator(request, group_id, user_id):
+    try:
+        user = Profile.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        group.moderators.remove(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
         return False
