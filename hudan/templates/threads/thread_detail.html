@@ -56,6 +56,15 @@
                 >{{ post.likes_down }}</span
               >
             </div>
+             <!-- Edit and Delete buttons for moderators -->
+
+          
+            {% if current_user in group.moderators.all or current_user == group.owner or current_user.is_admin %}
+            <form action="{% url 'groups:threads:delete_post' group_id=group.id thread_id=thread.id post_id=post.id %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return;">Delete</button>
+            </form>
+            {% endif %}    
           </div>
 
           {% endfor %} {% else %}

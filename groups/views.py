@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .services import group_create, group_get_by_id, group_edit, group_get_threads, group_is_user_administrator, group_remove, add_mod_request, remove_mod_request, add_moderator, remove_moderator
 from users.services import user_current, user_is_logged, user_get_by_id
+from threads.services import  thread_get_by_id
 from .models import Group
 
 # Create your views here.
@@ -99,3 +100,4 @@ def delete_moderator(request, group_id, user_id):
     user = user_get_by_id(request, user_id)
     remove_moderator(request, group.id, user.id)
     return detail(request, group_id)
+

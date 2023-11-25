@@ -1,5 +1,5 @@
 from django.contrib.sessions.models import Session
-from .models import Thread, Post, PostLike
+from .models import Thread, Post, PostLike, Group
 import time
 from django.utils import timezone
 
@@ -119,3 +119,29 @@ def post_likes_count(request, post):
         # print exception
         print("Post likes not found: %s" % exception)
         return None
+    
+def delete_post_service(group, thread, post, user):
+    # Check if the user is allowed to delete the post (moderator or author)
+    if user in group.moderators.all() or post.author == user:
+        post.delete()
+        return True
+    else:
+        return False
+    
+def delete_thread_service(request, thread):
+    try:
+        thread = Thread.objects.get(id=thread.id)
+        thread.delete()
+        return True
+    except (Group.DoesNotExist, Thread.DoesNotExist):
+        return False
+
+
+def edit_thread_service(request, thread, content):
+    try:
+        thread = Thread.objects.get(id=thread.id)
+        thread.title = content
+        thread.save()
+        return True
+    except (Group.DoesNotExist, Thread.DoesNotExist):
+        return False

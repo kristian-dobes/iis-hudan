@@ -141,6 +141,15 @@
               >
                 {{ thread.title }}
               </a>
+              {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
+                  <!-- Edit thread form -->
+                  <form action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="text" name="title" value="{{ thread.title }}" placeholder="New thread title" required>
+                    <button type="submit">Update Title</button>
+                </form> 
+                  <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}">Remove</a>
+              {% endif %}
               {% endfor %}
             </div>
             {% else %}
