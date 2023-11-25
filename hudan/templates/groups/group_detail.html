@@ -4,38 +4,90 @@
   <div class="row justify-content-center">
     <div class="col-md-8">
       {% if not group %}
-      <div class="alert alert-danger" role="alert">Skupina neexistuje.</div>
+        <div class="alert alert-danger" role="alert">Skupina neexistuje.</div>
       {% else %}
-      <div class="card">
-        <div class="card-header">
-          <h3>{{ group.title }}</h3>
+        <div class="card">
+          <div class="card-header">
+            <h3>{{ group.title }}</h3>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <img
+                  src="{{ group.image_url }}"
+                  class="img-fluid rounded-circle"
+                  alt="{{ group.title }}"
+                  style="max-width: 150px"
+                />
+              </div>
+              <div class="col-md-8">
+                <h4 class="mb-3">Bio:</h4>
+                <p>{{ group.description }}</p>
+                <h5 class="mb-3">Majitel skupiny:</h5>
+                <p>{{ group.owner.username }}</p>
+              </div>
+            </div>
+            <!-- Edit button -->
+            {% if current_user == group.owner or current_user.is_admin %}
+              <div class="row justify-content-center mt-3">
+                <div class="col-md-6">
+                  <a
+                    href="{% url 'groups:edit' group_id=group.id %}"
+                    class="btn btn-primary btn-block"
+                    >Upravit skupinu</a
+                  >
+                </div>
+              </div>
+            {% endif %}
+          </div>
         </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-4 text-center">
-              <img
-                src="{{ group.image_url }}"
-                class="img-fluid rounded-circle"
-                alt="{{ group.title }}"
-                style="max-width: 150px"
+      {%if is_user_admin%}
+        <div class="container mt-5">
+          <h2>Vytvořit vlákno</h2>
+          <form
+            method="post"
+            action="{% url 'groups:threads:create' group_id=group.id %}"
+          >
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="name">Název</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                required
               />
             </div>
-            <div class="col-md-8">
-              <h4 class="mb-3">Bio:</h4>
-              <p>{{ group.description }}</p>
+            <button type="submit" class="btn btn-primary btn-block">
+              Vytvořit
+            </button>
+          </form>
+        </div>
+      {% endif %}
+        <div class="container mt-5">
+          <h2>Vlákna</h2>
+          {% if group.content_visibility > 1 and not is_user_logged %}
+            <div class="alert alert-info" role="alert">
+              Nemáte oprávnění pro zobrazení. Pro zobrazení se musíte <a href="/login/">přihlásit</a>
             </div>
-          </div>
-          <!-- Edit button -->
-          {% if current_user == group.owner or current_user.is_admin %}
-          <div class="row justify-content-center mt-3">
-            <div class="col-md-6">
-              <a
-                href="{% url 'groups:edit' group_id=group.id %}"
-                class="btn btn-primary btn-block"
-                >Upravit skupinu</a
-              >
-            </div>
-          </div>
+          {%else%}
+            {% if threads %}
+              <div class="list-group">
+                {% for thread in threads %}
+                  <a
+                    href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}"
+                    class="list-group-item list-group-item-action"
+                  >
+                    {{ thread.title }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="alert alert-info" role="alert">
+                Skupina nemá žádné vlákno.
+              </div>
+            {% endif %}
           {% endif %}
         </div>
       </div>
@@ -98,48 +150,54 @@
     </ul>
 
       {%if is_user_admin%}
-      <div class="container mt-5">
-        <h2>Vytvořit vlákno</h2>
-        <form
-          method="post"
-          action="{% url 'groups:threads:create' group_id=group.id %}"
-        >
-          {% csrf_token %}
-          <div class="form-group">
-            <label for="name">Název</label>
-            <input
-              type="text"
-              class="form-control"
-              id="name"
-              name="name"
-              required
-            />
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">
-            Vytvořit
-          </button>
-        </form>
-      </div>
-      {% endif %}
-      <div class="container mt-5">
-        <h2>Vlákna</h2>
-        {% if threads %}
-        <div class="list-group">
-          {% for thread in threads %}
-          <a
-            href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}"
-            class="list-group-item list-group-item-action"
+        <div class="container mt-5">
+          <h2>Vytvořit vlákno</h2>
+          <form
+            method="post"
+            action="{% url 'groups:threads:create' group_id=group.id %}"
           >
-            {{ thread.title }}
-          </a>
-          {% endfor %}
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="name">Název</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              Vytvořit
+            </button>
+          </form>
         </div>
-        {% else %}
-        <div class="alert alert-info" role="alert">
-          Skupina nemá žádné vlákno.
+      {% endif %}
+        <div class="container mt-5">
+          <h2>Vlákna</h2>
+          {% if group.content_visibility > 1 and not is_user_logged %}
+            <div class="alert alert-info" role="alert">
+              Nemáte oprávnění pro zobrazení. Pro zobrazení se musíte <a href="/login/">přihlásit</a>
+            </div>
+          {%else%}
+            {% if threads %}
+              <div class="list-group">
+                {% for thread in threads %}
+                  <a
+                    href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}"
+                    class="list-group-item list-group-item-action"
+                  >
+                    {{ thread.title }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="alert alert-info" role="alert">
+                Skupina nemá žádné vlákno.
+              </div>
+            {% endif %}
+          {% endif %}
         </div>
-        {% endif %}
-      </div>
       {% endif %}
     </div>
   </div>

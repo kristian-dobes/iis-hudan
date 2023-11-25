@@ -45,10 +45,24 @@
             id="bio"
             name="bio"
             rows="4"
-            value="{{ profile.bio }}"
-          >
-{{ profile.bio }}</textarea
-          >
+            value="{{current_user.bio}}">{{current_user.bio}}</textarea>
+        </div>
+
+        <!-- Profile Visibility Section -->
+        <div class="form-profile mt-3">
+          <label>Profile Visibility:</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="visibility" id="visibilityEveryone" value="1" {% if current_user.visibility == 1 %}checked{% endif %}>
+            <label class="form-check-label" for="visibilityEveryone">Visible to everyone</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="visibility" id="visibilityRegistered" value="2" {% if current_user.visibility == 2 %}checked{% endif %}>
+            <label class="form-check-label" for="visibilityRegistered">Visible to registered users</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="visibility" id="visibilityGroupMembers" value="3" {% if current_user.visibility == 3 %}checked{% endif %}>
+            <label class="form-check-label" for="visibilityGroupMembers">Visible to group members</label>
+          </div>
         </div>
 
         <div class="form-profile mt-3">

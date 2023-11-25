@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- templates/users/list_users.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Users</title>
+
+</head>
+<body>
+    <h1>List of Users</h1>
+    <form method="GET" action="{% url 'users:list_users' %}">
+        <input type="text" name="search" placeholder="Search users..." value="{{ request.GET.search|default:'' }}" />
+        <button type="submit">Search</button>
+    </form>
+    <ul>
+        {% for profile in profiles %}
+            <li>
+                {{ profile.username }}
+
+                <a href="{% url 'users:edit' user_id=profile.id %}">Edit</a> |
+                <a href="{% url 'users:delete_user' user_id=profile.id %}">Delete</a>
+            </li>
+        {% empty %}
+            <li>No users found.</li>
+        {% endfor %}
+    </ul>
+   
+</body>
+</html>
+
+{% endblock %}

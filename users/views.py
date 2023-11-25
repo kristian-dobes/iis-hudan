@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect
 from .models import Profile
-from .services import user_get_by_id, user_remove
+from .services import user_get_by_id, user_remove, user_is_logged
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from .services import user_get_by_id, verify_password
 
 def detail(request, user_id):
     user = user_get_by_id(request, user_id)
-    return render(request, 'users/user_detail.html', {'profile': user})
+    is_user_logged = user_is_logged(request)
+    
+    return render(request, 'users/user_detail.html', {'profile': user, 'is_user_logged': is_user_logged})
 
 def edit(request, user_id):
     print(user_id)
@@ -16,6 +18,8 @@ def edit(request, user_id):
         user.username = request.POST['username']
         user.profile_picture_url = request.POST['image_url']
         user.bio = request.POST['bio']
+        user.visibility = request.POST['visibility']
+        
         user.save()
         return redirect('users:detail', user_id=user.id )
     else:

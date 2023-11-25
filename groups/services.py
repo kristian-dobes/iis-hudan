@@ -28,7 +28,7 @@ def group_get_all(request):
     except Group.DoesNotExist:
         return None
 
-def group_edit(request, group_id, name, image_url, description):
+def group_edit(request, group_id, name, image_url, description, content_visibility):
     try:
         user = user_current(request)
         if user is None:
@@ -39,6 +39,7 @@ def group_edit(request, group_id, name, image_url, description):
         group.title = name
         group.image_url = image_url
         group.description = description
+        group.content_visibility = content_visibility
         group.save()
         return group.id
     except:
