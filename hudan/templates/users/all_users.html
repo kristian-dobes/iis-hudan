@@ -21,7 +21,7 @@
         {% for profile in profiles %}
             <li>
                 {{ profile.username }}
-
+                <a href="{% url 'users:change_password' user_id=profile.id %}">Set password</a> |
                 <a href="{% url 'users:edit' user_id=profile.id %}">Edit</a> |
                 <a href="{% url 'users:delete_user' user_id=profile.id %}">Delete</a>
             </li>
