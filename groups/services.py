@@ -42,7 +42,7 @@ def group_edit(request, group_id, name, image_url, description, content_visibili
         if user is None:
             raise Exception('User is not logged in')
         group = Group.objects.get(id=group_id)
-        if group.owner != user:
+        if group.owner != user and not user.is_admin:
             raise Exception('User is not owner of the group')
         group.title = name
         group.image_url = image_url

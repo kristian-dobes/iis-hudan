@@ -1,4 +1,6 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 
 <div class="container mt-5">
   <div class="row justify-content-center">
@@ -8,25 +10,26 @@
       <div class="alert alert-danger" role="alert">{{ error }}</div>
       {% endif %}
 
-      <h1 class="mb-4">Edit {{ profile.username }}'s profile</h1> {% comment %}TODO better title{% endcomment %}
+      <h1 class="mb-4">Edit {{ profile.username }}'s Profile</h1>
 
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- User profile Name -->
-        <div class="form-user">
-          <label for="name">User:</label>
+        <div class="form-group">
+          <label for="username">Username <span class="text-danger">*</span>:</label>
           <input
             type="text"
             class="form-control"
             id="username"
             name="username"
             value="{{ profile.username }}"
+            required
           />
         </div>
 
         <!-- User Image URL -->
-        <div class="form-profile mt-3">
+        <div class="form-group mt-3">
           <label for="image_url">Image URL:</label>
           <input
             type="text"
@@ -38,14 +41,14 @@
         </div>
 
         <!-- User Bio -->
-        <div class="form-proifle mt-3">
+        <div class="form-group mt-3">
           <label for="bio">Bio:</label>
           <textarea
             class="form-control"
             id="bio"
             name="bio"
             rows="4"
-            value="{{current_user.bio}}">{{current_user.bio}}</textarea>
+          >{{ profile.bio }}</textarea>
         </div>
 
         <!-- Profile Visibility Section -->
@@ -67,6 +70,10 @@
 
         <div class="form-profile mt-3">
           <input type="submit" class="btn btn-primary" value="Save profile changes" />
+        </div>
+        <!-- Disclaimer for the asterisk -->
+        <div class="form-text text-muted">
+          <small><span class="text-danger">*</span> Indicates a required field.</small>
         </div>
       </form>
     </div>

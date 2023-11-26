@@ -121,7 +121,7 @@
       </ul>
       </div>
 
-      {%if is_user_admin%}
+      {%if is_user_admin or current_user.is_admin %}
       <div class="container mt-5">
         <h2>Create thread</h2>
         <form
