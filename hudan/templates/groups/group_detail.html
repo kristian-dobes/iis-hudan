@@ -104,13 +104,16 @@
       <div class="container mt-5">
       <h2>List of Moderators</h2>
               <div class="col text-right">
-                <!-- Only show add member if the current user is admin or the owner of the group -->
+                <!-- Only show add Mod if the current user is admin or the owner of the group -->
                 {% if current_user.is_admin or current_user == group.owner %}
                     <button id="addModButton" class="btn btn-primary">Add Moderator</button>
                 {% endif %}
               </div>
 
-        <!-- Form to Add a New Member -->
+        <!-- Form to Add a New Mod -->
+              {% if error_mod %}
+              <div class="alert alert-danger" role="alert">{{ error_mod }}</div>
+              {% endif %}
               <div id="addModForm" style="display: none; margin-top: 15px;">
                   <form method="post" action="{% url 'groups:new_mod' group_id=group.id %}">
                       {% csrf_token %}
@@ -229,6 +232,8 @@
       <div class="container mt-5">
         <h2>Member Requests</h2>
         {% if group.requested_to_join.all %}
+
+        
           <ul class="list-group">
             {% for requester in group.requested_to_join.all %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -265,6 +270,9 @@
         </div>
         
         <!-- Form to Add a New Member -->
+        {% if error_mem %}
+          <div class="alert alert-danger" role="alert">{{ error_mem }}</div>
+        {% endif %}
         <div id="addMemberForm" style="display: none; margin-top: 15px;">
             <form method="post" action="{% url 'groups:new_member' group_id=group.id %}">
                 {% csrf_token %}

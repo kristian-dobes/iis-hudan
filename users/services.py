@@ -33,6 +33,13 @@ def user_login(request, username, password):
     
     return False
 
+def profile_get_all(request):
+    try:
+        return Profile.objects.all()
+    except Profile.DoesNotExist:
+        return None
+
+
 def user_logout(request):
     if 'user_id' in request.session:
         del request.session['user_id']

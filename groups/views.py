@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .services import group_create, group_get_by_id, group_edit, group_get_threads, group_is_user_administrator, group_remove, add_mod_request, remove_mod_request, add_moderator, remove_moderator, add_memb_request, remove_memb_request, add_member, remove_member
+from .services import group_create, group_get_by_id, group_edit, group_get_threads, group_is_user_administrator, group_remove, add_mod_request, remove_mod_request, add_moderator, remove_moderator, add_memb_request, remove_memb_request, add_member, remove_member, add_moderator_username, add_member_username, group_get_all
 from users.services import user_current, user_is_logged, user_get_by_id
 from threads.services import  thread_get_by_id
 from .models import Group
@@ -65,7 +65,7 @@ def list_groups(request):
         # Adjust the filter to match the attributes of your Profile model
         groups = Group.objects.filter(username__icontains=search_query)
     else:
-        groups = Group.objects.all()
+        groups = group_get_all(request)
 
     return render(request, 'groups/list_groups.html', {'groups': groups, 'request': request})
 
@@ -74,7 +74,7 @@ def delete_group(request, group_id):
     group = group_get_by_id(request, group_id)
     if request.method == "POST":
         group_remove(request, group.id)  # This will delete the User and the associated Profile
-        groups = Group.objects.all()
+        groups = group_get_all(request)
         return render(request, 'groups/list_groups.html', {'groups': groups})
     return render(request, 'groups/confirm_delete.html', {'group': group})
 
@@ -131,18 +131,27 @@ def delete_member(request, group_id, user_id):
     return detail(request, group_id)
 
 def new_member(request, group_id):
+    user = user_current(request)
     group = group_get_by_id(request, group_id)
     username =  request.POST['new_member']
-    user = Profile.objects.get(username=username)
-    add_member(request, group.id, user.id)
-    return detail(request, group_id)
+    threads = group_get_threads(request, group_id)
+    is_user_admin = group_is_user_administrator(request, group_id, user) 
+    is_user_logged = user_is_logged(request)
+    if not add_member_username(request, group.id, username):
+            return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged,'error_mem': 'Error during user search'})
+    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged})
 
 def new_mod(request, group_id):
+    user = user_current(request)
     group = group_get_by_id(request, group_id)
     username =  request.POST['new_mod']
-    user = Profile.objects.get(username=username)
-    add_moderator(request, group.id, user.id)
-    if user not in group.members.all():
-        add_member(request, group.id, user.id)
-    return detail(request, group_id)
+    threads = group_get_threads(request, group_id)
+    is_user_admin = group_is_user_administrator(request, group_id, user) 
+    is_user_logged = user_is_logged(request)
+    add_moderator_username(request, group.id, username)
+
+    if not group.members.filter(username=username).exists():
+        if not add_member_username(request, group.id, username):
+            return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged, 'error_mod': 'Error during user search'})
+    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged})
 

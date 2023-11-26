@@ -178,4 +178,25 @@ def common_group(request, user1, user2):
         return False
     except:
         return False
+
+def add_moderator_username(request, group_id, username):
+    try:
+        user = Profile.objects.get(username=username)
+        group = Group.objects.get(id=group_id)
+        group.requested_for_moderator.remove(user)
+        group.moderators.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
     
+def add_member_username(request, group_id, username):
+    try:
+        user = Profile.objects.get(username=username)
+        group = Group.objects.get(id=group_id)
+        group.requested_to_join.remove(user)
+        group.members.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
