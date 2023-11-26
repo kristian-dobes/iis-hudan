@@ -103,7 +103,23 @@
       
       <div class="container mt-5">
       <h2>List of Moderators</h2>
-      <ul>
+              <div class="col text-right">
+                <!-- Only show add member if the current user is admin or the owner of the group -->
+                {% if current_user.is_admin or current_user == group.owner %}
+                    <button id="addModButton" class="btn btn-primary">Add Moderator</button>
+                {% endif %}
+              </div>
+
+        <!-- Form to Add a New Member -->
+              <div id="addModForm" style="display: none; margin-top: 15px;">
+                  <form method="post" action="{% url 'groups:new_mod' group_id=group.id %}">
+                      {% csrf_token %}
+                      <div class="form-group">
+                          <input type="text" class="form-control" id="new_mod" name="new_mod" placeholder="Enter username" required>
+                      </div>
+                      <button type="submit" class="btn btn-success">Add</button>
+                  </form>
+              </div>
         {% for mod in group.moderators.all %}
             <li>
               <a href="{% url 'users:detail' user_id=mod.id %}">
@@ -113,6 +129,8 @@
 
                 {% if current_user.is_admin or current_user == group.owner %}
                   <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Remove</a>
+                {% elif current_user in group.moderators.all and current_user.id == mod.id%}
+                  <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Rescind</a>
                 {% endif %}
             </li>
         {% empty %}
@@ -243,7 +261,29 @@
 
       
       <div class="container mt-5">
-        <h2>List of Members</h2>
+        <div class="row">
+            <div class="col">
+                <h2>List of Members</h2>
+            </div>
+            <div class="col text-right">
+                <!-- Only show add member if the current user is admin or the owner of the group -->
+                {% if current_user.is_admin or current_user == group.owner %}
+                    <button id="addMemberButton" class="btn btn-primary">Add Member</button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Form to Add a New Member -->
+        <div id="addMemberForm" style="display: none; margin-top: 15px;">
+            <form method="post" action="{% url 'groups:new_member' group_id=group.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" class="form-control" id="new_member" name="new_member" placeholder="Enter username" required>
+                </div>
+                <button type="submit" class="btn btn-success">Add</button>
+            </form>
+        </div>
+
         {% if group.content_visibility > 1 and not current_user %}
           <div class="alert alert-info" role="alert">
             You don't have permission to view group members. Try to <a href="/login/">Sign in</a>
@@ -278,6 +318,19 @@
 </div>
 </div>
 
+<script>
+    document.getElementById('addMemberButton').addEventListener('click', function() {
+        var form = document.getElementById('addMemberForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+</script>
+
+<script>
+  document.getElementById('addModButton').addEventListener('click', function() {
+      var form = document.getElementById('addModForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  });
+</script>
 
 <script>
   {% comment %} for showing and hiding the edit form {% endcomment %}

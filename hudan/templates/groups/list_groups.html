@@ -20,7 +20,12 @@
     <ul>
         {% for group in groups %}
             <li>
+                <a
+                  href="{% url 'groups:detail' group_id=group.id %}"
+                  class="message-author"
+                >
                 {{ group.title }}
+                </a>
                 <a href="{% url 'groups:edit' group_id=group.id %}">Edit</a> |
                 <a href="{% url 'groups:delete_group' group_id=group.id %}">Delete</a>
             </li>

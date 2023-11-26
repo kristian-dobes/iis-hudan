@@ -21,4 +21,7 @@ urlpatterns = [
     path('approve_member/<int:user_id>/<int:group_id>/', views.approve_member_request, name='approve_member'),
     path('reject_member/<int:user_id>/<int:group_id>/', views.reject_member_request, name='reject_member'),
     path('delete_member/<int:user_id>/<int:group_id>/', views.delete_member, name='delete_member'),
+    path('new_member/<int:group_id>/', views.new_member, name='new_member'),
+    path('new_mod/<int:group_id>/', views.new_mod, name='new_mod'),
+    
 ] 
