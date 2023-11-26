@@ -5,7 +5,7 @@ class Profile(models.Model):
     is_admin = models.BooleanField(default=False)
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=255)
-    profile_picture_url = models.CharField(max_length=200)
+    profile_picture_url = models.CharField(max_length=200, default='https://cdn3.emoji.gg/emojis/6392-gigachad.png')
     bio = models.CharField(max_length=1024)
     
     # Visibility choices

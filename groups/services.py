@@ -1,5 +1,7 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.sessions.models import Session
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from groups.models import Group
 from users.models import Profile
 from threads.models import Thread
@@ -10,8 +12,20 @@ def group_create(request, name, image_url, description, content_visibility):
         user = user_current(request)
         if user is None:
             raise Exception('User is not logged in')
+        
+        # Validate image_url if it is not empty
+        if image_url:
+            validate = URLValidator()
+            try:
+                validate(image_url)
+            except ValidationError as e:
+                raise Exception('Invalid image URL')
+        
+        if image_url == '':
+            image_url = 'https://www.poszetka.com/data/include/img/news/1650028664.jpg'
+        
         group = Group.objects.create(
-            title=name, 
+            title=name,
             image_url=image_url, 
             description=description, 
             owner=user, 

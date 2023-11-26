@@ -61,7 +61,7 @@
       </div>
       {% endif %}
 
-      {% if not current_user.is_admin and not current_user == group.owner and current_user not in group.moderators.all and current_user in group.members.all and current_user %}
+      {% if not current_user == group.owner and current_user not in group.moderators.all and current_user in group.members.all and current_user %}
       <div class="container mt-5">
         <h2>Become Moderator</h2>
         <form method="post" action="{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}">
@@ -158,35 +158,45 @@
           </div>
         {%else%}
           {% if threads %}
-            <div class="list-group">
+          <div class="list-group">
               {% for thread in threads %}
-              {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
-              <!-- Editable thread title -->
-              <div class="thread-title" ondblclick="showEdit(this)">
-                <span class="title-text">Edit title</span>
-                <form action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" style="display: none;">
-                  {% csrf_token %}
-                  <input type="text" name="title" value="{{ thread.title }}" class="edit-input" required>
-                  <button type="submit" class="btn-update-title">Update Title</button>
-                  <button type="button" onclick="hideEdit(this)" class="btn-cancel-edit">Cancel</button>
-                </form>
-                <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}" class="btn-delete-thread">Delete thread</a>
-              </div>
-            {% endif %}
-              <a
-                href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}"
-                class="list-group-item list-group-item-action"
-              >
-                {{ thread.title }}
-              </a>
-              
+                  <!-- Thread item with Edit and Delete options -->
+                  <div class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                          <div>
+                              <!-- Thread title and link -->
+                              <a href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}" class="font-weight-bold text-decoration-none">
+                                  {{ thread.title }}
+                              </a>
+                          </div>
+          
+                          <!-- Edit and Delete buttons are always visible now -->
+                          {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
+                          <div>
+                              <button onclick="showEdit({{ thread.id }})" class="btn btn-sm btn-outline-primary">Edit</button>
+                              <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                          </div>
+                          {% endif %}
+                      </div>
+          
+                      <!-- Hidden form for editing the title -->
+                      <form id="edit-form-{{ thread.id }}" action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="mt-2" style="display: none;">
+                          {% csrf_token %}
+                          <input type="text" name="title" value="{{ thread.title }}" class="form-control mb-2" required>
+                          <button type="submit" class="btn btn-sm btn-primary">Update Title</button>
+                          <button type="button" onclick="hideEdit({{ thread.id }})" class="btn btn-sm btn-secondary">Cancel</button>
+                      </form>
+                  </div>
               {% endfor %}
-            </div>
-            {% else %}
-            <div class="alert alert-info" role="alert">
-              Group has no threads.
-            </div>
+          </div>
+          {% else %}
+              <div class="alert alert-info" role="alert">
+                  Group has no threads.
+              </div>
           {% endif %}
+        
+        
+        
         {% endif %}
       </div>
 
@@ -265,18 +275,18 @@
   </div>
     
 </div>
+</div>
+</div>
 
 
 <script>
-  function showEdit(element) {
-  element.querySelector('.title-text').style.display = 'none';
-  element.querySelector('.edit-form').style.display = 'block';
+  {% comment %} for showing and hiding the edit form {% endcomment %}
+function showEdit(threadId) {
+  document.getElementById('edit-form-' + threadId).style.display = 'block';
 }
 
-function hideEdit(element) {
-  const editForm = element.closest('.edit-form');
-  editForm.style.display = 'none';
-  editForm.previousElementSibling.style.display = 'block';
+function hideEdit(threadId) {
+    document.getElementById('edit-form-' + threadId).style.display = 'none';
 }
 </script>
 

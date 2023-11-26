@@ -20,20 +20,20 @@
                 
                 <!-- Group Name -->
                 <div class="form-group">
-                    <label for="name">Group Name:</label>
+                    <label for="name">Group Name:<span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="name" name="name" required>
                 </div>
 
                 <!-- Group Image URL -->
                 <div class="form-group mt-3">
-                    <label for="image_url">Image URL:</label>
-                    <input type="text" class="form-control" id="image_url" name="image_url" required>
+                    <label for="image_url">Image URL:<span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="image_url" name="image_url">
                 </div>
 
                 <!-- Group Description -->
                 <div class="form-group mt-3">
-                    <label for="description">Description:</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    <label for="description">Description:<span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="description" name="description" rows="4"></textarea>
                 </div>
 
                 <!-- Content Visibility Section -->
@@ -52,6 +52,8 @@
                     <label class="form-check-label" for="visibilityGroupMembers">Visible to group members only</label>
                     </div>
                 </div>
+
+                <p class="text-muted"><small><span class="text-danger">*</span> Indicates a required field.</small></p>
 
                 <div class="form-group mt-3">
                     <input type="submit" class="btn btn-primary" value="Create Group">
