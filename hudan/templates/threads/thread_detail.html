@@ -69,7 +69,7 @@
 
           {% endfor %} {% else %}
           <div class="alert alert-info" role="alert" id="no-messages-yet">
-            Žádné zprávy.
+            No messages.
           </div>
           {% endif %}
         </div>
@@ -82,13 +82,13 @@
         {% elif current_user %}
           <div class="card-footer">
             <div class="alert alert-info" role="alert">
-              Pro psaní zpráv musíte být členem skupiny
+              To make posts you have to be a member of the group
             </div>
           </div>
         {% else %}
         <div class="card-footer">
           <div class="alert alert-info" role="alert">
-            Nemáte právo pro psaní zpráv. Zkuste se <a href="{% url 'login' %}">přihlásit</a>
+            You do not have permission to make posts. Try to <a href="{% url 'login' %}">login</a>
           </div>
         </div>
         {% endif %}

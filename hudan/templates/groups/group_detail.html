@@ -4,7 +4,7 @@
   <div class="row justify-content-center">
     <div class="col-md-8">
     {% if not group %}
-      <div class="alert alert-danger" role="alert">Skupina neexistuje.</div>
+      <div class="alert alert-danger" role="alert">Group doesn't exist.</div>
     {% else %}
       <div class="card">
         <div class="card-header">
@@ -23,7 +23,7 @@
             <div class="col-md-8">
               <h4 class="mb-3">Bio:</h4>
               <p>{{ group.description }}</p>
-              <h5 class="mb-3">Zakladatel skupiny:</h5>
+              <h5 class="mb-3">Group creator:</h5>
               <ul class="navbar-nav">  
                 <li class="nav-item d-flex align-items-center">
                     <a href="{% url 'users:detail' user_id=group.owner.id %}">
@@ -41,7 +41,7 @@
               <a
                 href="{% url 'groups:edit' group_id=group.id %}"
                 class="btn btn-primary btn-block"
-                >Upravit skupinu</a
+                >Change group</a
               >
             </div>
           </div>
@@ -118,7 +118,7 @@
         >
           {% csrf_token %}
           <div class="form-group">
-            <label for="name">Název</label>
+            <label for="name">Name</label>
             <input
               type="text"
               class="form-control"
@@ -128,7 +128,7 @@
             />
           </div>
           <button type="submit" class="btn btn-primary btn-block">
-            Vytvořit
+            Create
           </button>
         </form>
       </div>
@@ -138,11 +138,11 @@
         <h2>Vlákna</h2>
         {% if group.content_visibility > 1 and not current_user %}
           <div class="alert alert-info" role="alert">
-            Nemáte oprávnění pro zobrazení. Zkuste se <a href="/login/">přihlásit</a>
+           You do not have permission to view. Try to <a href="/login/">login</a>
           </div>
         {% elif group.content_visibility > 2 and current_user not in group.members.all and current_user.id is not group.owner.id %}
           <div class="alert alert-info" role="alert">
-            Nemáte oprávnění pro zobrazení. Pro zobrazení musíte být členem skupiny.
+            You do not have permission to view. You must be a member of this group.
           </div>
         {%else%}
           {% if threads %}
@@ -167,7 +167,7 @@
             </div>
             {% else %}
             <div class="alert alert-info" role="alert">
-              Skupina nemá žádné vlákno.
+              Group has no threads.
             </div>
           {% endif %}
         {% endif %}
