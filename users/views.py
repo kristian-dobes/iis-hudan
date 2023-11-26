@@ -69,6 +69,6 @@ def change_password(request, user_id):
             user.save()
             return redirect('users:detail', user_id=user.id)
         else:
-            return render(request, 'users/change_password.html', {'error': 'Špatné heslo'})
+            return render(request, 'users/change_password.html', {'error': 'Wrong password!'})
     else:
         return render(request, 'users/change_password.html')

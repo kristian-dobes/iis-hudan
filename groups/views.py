@@ -29,7 +29,7 @@ def edit(request, group_id):
         if edited_id is None:
         # show group detail with error message
             group = group_get_by_id(request, group_id)
-            return render(request, 'groups/edit_group.html', {'group': group, 'error': 'Chyba při editaci skupiny'})
+            return render(request, 'groups/edit_group.html', {'group': group, 'error': 'Error during group edit'})
         else:
             return redirect('groups:detail', group_id=edited_id)
     
@@ -52,7 +52,7 @@ def create(request):
         visibility = request.POST['content_visibility']
         created_id = group_create(request, name, image_url, description, visibility)
         if created_id is None:
-            return render(request, 'groups/create_group.html', {'error': 'Chyba při vytváření skupiny'})
+            return render(request, 'groups/create_group.html', {'error': 'Error during group creation'})
         else:
             return redirect('groups:detail', group_id=created_id)
             

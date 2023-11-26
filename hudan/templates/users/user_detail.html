@@ -7,17 +7,17 @@
         <div class="col-md-8">
             {% if not profile %}
                 <div class="alert alert-danger" role="alert">
-                    Uživatel neexistuje.
+                    User doesn't exist.
                 </div>
             {% else %}
                 <div class="card">
                     <div class="card-header">
-                        <h3>Uživatel: {{ profile.username }}</h3>
+                        <h3>User: {{ profile.username }}</h3>
                     </div>
                     {% if profile.visibility > 1 and not is_user_logged %}
                         <div class="card-body">
                             <div class="alert alert-info" role="alert">
-                                You do not have permission to view. To view user profiles you have to <a href="/login/">login</a>
+                                You do not have permission to view this user's info. Try to <a href="/login/">Sign in</a>
                             </div>
                         </div>
                     {% else%}

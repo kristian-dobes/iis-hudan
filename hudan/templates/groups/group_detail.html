@@ -111,7 +111,7 @@
 
       {%if is_user_admin%}
       <div class="container mt-5">
-        <h2>Vytvořit vlákno</h2>
+        <h2>Create thread</h2>
         <form
           method="post"
           action="{% url 'groups:threads:create' group_id=group.id %}"
@@ -135,10 +135,10 @@
       {% endif %}
 
       <div class="container mt-5">
-        <h2>Vlákna</h2>
+        <h2>Threads</h2>
         {% if group.content_visibility > 1 and not current_user %}
           <div class="alert alert-info" role="alert">
-           You do not have permission to view. Try to <a href="/login/">login</a>
+           You do not have permission to view. Try to <a href="/login/">Sign in</a>
           </div>
         {% elif group.content_visibility > 2 and current_user not in group.members.all and current_user.id is not group.owner.id %}
           <div class="alert alert-info" role="alert">
@@ -220,7 +220,7 @@
         <h2>List of Members</h2>
         {% if group.content_visibility > 1 and not current_user %}
           <div class="alert alert-info" role="alert">
-            Nemáte oprávnění pro zobrazení členů skupiny. Zkuste se <a href="/login/">přihlásit</a>
+            You don't have permission to view group members. Try to <a href="/login/">Sign in</a>
           </div>
         {% else %}
             <ul>
