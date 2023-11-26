@@ -156,6 +156,8 @@ def remove_member(request, group_id, user_id):
     try:
         user = Profile.objects.get(id=user_id)
         group = Group.objects.get(id=group_id)
+        if user in group.moderators.all():
+            group.moderators.remove(user)
         group.members.remove(user)
         group.save()
         return True
