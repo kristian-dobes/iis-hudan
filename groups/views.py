@@ -20,7 +20,6 @@ def edit(request, group_id):
         description = request.POST['description']
         content_visibility = request.POST['content_visibility']
         delete_group = request.POST.get('delete_group', False)
-        
         if delete_group:
             group_remove(request, group_id)
             return redirect('home')

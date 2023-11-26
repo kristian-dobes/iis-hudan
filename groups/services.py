@@ -5,13 +5,21 @@ from users.models import Profile
 from threads.models import Thread
 from users.services import user_current
 
-
 def group_create(request, name, image_url, description, content_visibility):
     try:
         user = user_current(request)
         if user is None:
             raise Exception('User is not logged in')
-        group = Group.objects.create(title=name, image_url=image_url, description=description, owner=user, content_visibility=content_visibility)
+        group = Group.objects.create(
+            title=name, 
+            image_url=image_url, 
+            description=description, 
+            owner=user, 
+            content_visibility=content_visibility
+        )
+        
+        group.members.add(user)
+        group.save()
         return group.id
     except:
         return None
@@ -34,7 +42,7 @@ def group_edit(request, group_id, name, image_url, description, content_visibili
         if user is None:
             raise Exception('User is not logged in')
         group = Group.objects.get(id=group_id)
-        if group.owner != user:
+        if group.owner != user and not user.is_admin:
             raise Exception('User is not owner of the group')
         group.title = name
         group.image_url = image_url
@@ -153,3 +161,19 @@ def remove_member(request, group_id, user_id):
         return True
     except (Profile.DoesNotExist, Group.DoesNotExist):
         return False
+    
+# are there any common groups between user1 and user2?
+def common_group(request, user1, user2):
+    try:
+        groups1 = Group.objects.filter(members=user1)
+        groups2 = Group.objects.filter(members=user2)
+        
+        for group1 in groups1:
+            for group2 in groups2:
+                if group1 == group2:
+                    return True
+                
+        return False
+    except:
+        return False
+    

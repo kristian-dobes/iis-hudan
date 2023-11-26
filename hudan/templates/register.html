@@ -16,15 +16,15 @@
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="username">Username:</label>
+                <label for="username">Username <span class="text-danger">*</span>:</label>
                 <input type="text" class="form-control" id="username" name="username" required>
             </div>
             <div class="form-group">
-                <label for="password">Password:</label>
+                <label for="password">Password <span class="text-danger">*</span>:</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="form-group">
-                <label for="password2">Repeat password:</label>
+                <label for="password2">Confirm password <span class="text-danger">*</span>:</label>
                 <input type="password" class="form-control" id="password2" name="password2" required>
             </div>
             <div class="form-group row">
@@ -34,6 +34,10 @@
                 <div class="col-sm-6 text-right">
                     <p>Already have an account? <a href="/login/">Sign in</a></p>
                 </div>
+            </div>
+            <!-- Disclaimer for the asterisk -->
+            <div class="form-text text-muted">
+                <small><span class="text-danger">*</span> Indicates a required field.</small>
             </div>
         </form>
     </div>

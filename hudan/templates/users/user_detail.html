@@ -14,13 +14,19 @@
                     <div class="card-header">
                         <h3>User: {{ profile.username }}</h3>
                     </div>
-                    {% if profile.visibility > 1 and not is_user_logged %}
+                    {% if profile.visibility > 1 and not current_user %}
                         <div class="card-body">
                             <div class="alert alert-info" role="alert">
                                 You do not have permission to view this user's info. Try to <a href="/login/">Sign in</a>
                             </div>
                         </div>
-                    {% else%}
+                    {% elif profile.visibility > 2 and not common_group %}
+                        <div class="card-body">
+                            <div class="alert alert-info" role="alert">
+                                You do not have permission to view this user's info (you need to be in the same group).
+                            </div>
+                        </div>
+                    {% else %}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-4 text-center">
@@ -36,7 +42,7 @@
                             {% if current_user == profile %}
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:edit' current_user.id %}" class="btn btn-primary btn-block">Change profile</a>
+                                        <a href="{% url 'users:edit' current_user.id %}" class="btn btn-primary btn-block">Edit profile</a>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center mt-3">
@@ -46,7 +52,7 @@
                                 </div>
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:delete_self' current_user.id %}" class="btn btn-primary btn-block">Delete account</a>
+                                        <a href="{% url 'users:delete_self' current_user.id %}" class="btn btn-danger btn-block">Delete account</a>
                                     </div>
                                 </div>
                             {% endif %}
