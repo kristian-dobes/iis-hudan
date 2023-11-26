@@ -28,7 +28,7 @@
                   {{ post.author.username }}
                 </a>
               </strong>
-              <p class="message-text">{{ post.content }}</p>
+              <p class="message-text">{{ post.content|linebreaksbr }}</p>
             </div>
             <div class="message-likes">
               <button
@@ -369,7 +369,7 @@
 
   .message-text {
     margin: 2px 0;
-    color: #dcddde;
+    color: #2c2c2c;
   }
 
   .btn-like {

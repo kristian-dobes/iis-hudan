@@ -128,7 +128,7 @@
               </a>
 
                 {% if current_user.is_admin or current_user == group.owner %}
-                  <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Remove</a>
+                  <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Revoke</a>
                 {% elif current_user in group.moderators.all and current_user.id == mod.id%}
                   <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Rescind</a>
                 {% endif %}
