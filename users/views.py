@@ -1,15 +1,17 @@
 from django.shortcuts import render, redirect
 from .models import Profile
-from .services import user_get_by_id, user_remove, user_is_logged, user_logout
+from .services import user_get_by_id, user_remove, user_is_logged, user_logout, verify_password, user_current
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from .services import user_get_by_id, verify_password
+from groups.services import common_group
 
 def detail(request, user_id):
     user = user_get_by_id(request, user_id)
     is_user_logged = user_is_logged(request)
+    current_user = user_current(request)
+    any_common_group = common_group(request, user_id, current_user.id)
     
-    return render(request, 'users/user_detail.html', {'profile': user, 'is_user_logged': is_user_logged})
+    return render(request, 'users/user_detail.html', {'profile': user, 'is_user_logged': is_user_logged, 'common_group': any_common_group})
 
 def edit(request, user_id):
     print(user_id)
@@ -59,7 +61,6 @@ def delete_user(request, user_id):
         form_action = reverse('users:delete_self', kwargs={'user_id': user_id})
     return render(request, 'users/confirm_delete.html', {'form_action': form_action})
 
-    
 def change_password(request, user_id):
     if request.method == 'POST':
         user = user_get_by_id(request, request.session['user_id'])
