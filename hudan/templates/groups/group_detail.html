@@ -148,21 +148,26 @@
           {% if threads %}
             <div class="list-group">
               {% for thread in threads %}
+              {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
+              <!-- Editable thread title -->
+              <div class="thread-title" ondblclick="showEdit(this)">
+                <span class="title-text">Edit title</span>
+                <form action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" style="display: none;">
+                  {% csrf_token %}
+                  <input type="text" name="title" value="{{ thread.title }}" class="edit-input" required>
+                  <button type="submit" class="btn-update-title">Update Title</button>
+                  <button type="button" onclick="hideEdit(this)" class="btn-cancel-edit">Cancel</button>
+                </form>
+                <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}" class="btn-delete-thread">Delete thread</a>
+              </div>
+            {% endif %}
               <a
                 href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}"
                 class="list-group-item list-group-item-action"
               >
                 {{ thread.title }}
               </a>
-              {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
-                  <!-- Edit thread form -->
-                  <form action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post">
-                    {% csrf_token %}
-                    <input type="text" name="title" value="{{ thread.title }}" placeholder="New thread title" required>
-                    <button type="submit">Update Title</button>
-                </form> 
-                  <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}">Delete thread</a>
-              {% endif %}
+              
               {% endfor %}
             </div>
             {% else %}
@@ -247,5 +252,49 @@
   </div>
     
 </div>
+
+
+<script>
+  function showEdit(element) {
+  element.querySelector('.title-text').style.display = 'none';
+  element.querySelector('.edit-form').style.display = 'block';
+}
+
+function hideEdit(element) {
+  const editForm = element.closest('.edit-form');
+  editForm.style.display = 'none';
+  editForm.previousElementSibling.style.display = 'block';
+}
+</script>
+
+<style>
+  .thread-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.btn-update-title,
+.btn-cancel-edit {
+  padding: 4px 8px;
+  margin-left: 4px;
+}
+
+.btn-delete-thread {
+  margin-left: auto;
+  color: #ff0000;
+  text-decoration: none;
+}
+
+.edit-form {
+  display: none;
+}
+</style>
 
 {% endblock %}
