@@ -8,9 +8,12 @@ from groups.services import common_group
 def detail(request, user_id):
     user = user_get_by_id(request, user_id)
     is_user_logged = user_is_logged(request)
+    
+    if not is_user_logged:
+        return render(request, 'users/user_detail.html', {'profile': user, 'is_user_logged': is_user_logged})
+    
     current_user = user_current(request)
     any_common_group = common_group(request, user_id, current_user.id)
-    
     return render(request, 'users/user_detail.html', {'profile': user, 'is_user_logged': is_user_logged, 'common_group': any_common_group})
 
 def edit(request, user_id):

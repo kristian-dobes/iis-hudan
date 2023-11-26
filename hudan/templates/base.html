@@ -51,7 +51,7 @@
                     <a class="nav-link" href="{% url 'users:detail' current_user.id %}">
                         <img
                             src="{{ current_user.profile_picture_url }}" class="img-fluid rounded-circle"
-                            alt="{{ profile.username }}" style="max-height: 30px;max-width: 30px;"
+                            style="height: 30px; width: 30px;"
                         >
                         {{current_user.username}}
                     </a>
