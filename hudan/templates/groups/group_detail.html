@@ -49,6 +49,18 @@
         </div>
       </div>
 
+
+      {% if not current_user == group.owner and current_user in group.members.all and current_user %}
+      <div class="container mt-5">
+        <form method="post" action="{% url 'groups:delete_member' group_id=group.id user_id=current_user.id %}">
+          {% csrf_token %}
+          <div class="form-group">
+              <button type="submit" class="btn btn-primary btn-block">Leave group</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+
       {% if not current_user.is_admin and not current_user == group.owner and current_user not in group.moderators.all and current_user in group.members.all and current_user %}
       <div class="container mt-5">
         <h2>Become Moderator</h2>
@@ -179,7 +191,7 @@
       </div>
 
 
-      {% if not current_user.is_admin and not current_user == group.owner and current_user not in group.members.all and current_user %}
+      {% if not current_user == group.owner and current_user not in group.members.all and current_user %}
       <div class="container mt-5">
         <h2>Become a member of the group!</h2>
         <form method="post" action="{% url 'groups:add_member_request' group_id=group.id user_id=current_user.id %}">
