@@ -60,16 +60,12 @@ def create(request):
 
 
 def list_groups(request):
-    print("Listing groups")
     search_query = request.GET.get('search', '')
     if search_query:
-        print("query")
         # Adjust the filter to match the attributes of your Profile model
         groups = Group.objects.filter(username__icontains=search_query)
     else:
-        print("gg")
         groups = Group.objects.all()
-    print("here?")
 
     return render(request, 'groups/list_groups.html', {'groups': groups, 'request': request})
 
@@ -80,7 +76,6 @@ def delete_group(request, group_id):
         group_remove(request, group.id)  # This will delete the User and the associated Profile
         groups = Group.objects.all()
         return render(request, 'groups/list_groups.html', {'groups': groups})
-    print("confirm")
     return render(request, 'groups/confirm_delete.html', {'group': group})
 
 def add_moderator_request(request, group_id, user_id):
