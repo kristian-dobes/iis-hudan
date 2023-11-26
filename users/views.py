@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Profile
-from .services import user_get_by_id, user_remove, user_is_logged, user_logout, verify_password, user_current, change_password_service
+from .services import user_get_by_id, user_remove, user_is_logged, user_logout, verify_password, user_current, change_password_service, profile_get_all
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from groups.services import common_group
@@ -35,9 +35,9 @@ def list_users(request):
     search_query = request.GET.get('search', '')
     if search_query:
         # Adjust the filter to match the attributes of your Profile model
-        profiles = Profile.objects.filter(username__icontains=search_query)
+        profiles = Profile.objects.filter(username__icontains=search_query) # TODO move to services
     else:
-        profiles = Profile.objects.all()
+        profiles = profile_get_all(request)
 
     return render(request, 'users/all_users.html', {'profiles': profiles, 'request': request})
 
@@ -53,7 +53,6 @@ def delete_self(request, user_id):
 def delete_user(request, user_id):
     profile = user_get_by_id(request, user_id)
     if request.method == "POST":
-        print("dsa")
         user_remove(request, profile.id)  # This will delete the User and the associated Profile
         profiles = Profile.objects.all()
         return render(request, 'users/all_users.html', {'profiles': profiles})
@@ -68,12 +67,12 @@ def change_password(request, user_id):
     if request.method == 'POST':
         user = user_get_by_id(request, request.session['user_id'])
         cur_user = user_get_by_id(request, request.session['user_id'])
-        # TODO doesnt work, needs adjustments, needs to be hashed?
+
         password = request.POST['password']
         password2 = request.POST['password2']
         if cur_user.is_admin:
             change_password_service(request, password, password2, user_id)
-            profiles = Profile.objects.all()
+            profiles = profile_get_all(request)
             return render(request, 'users/all_users.html', {'profiles': profiles})
         
         if verify_password(request.POST['old_password'], user.password):
