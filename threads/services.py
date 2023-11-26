@@ -122,7 +122,7 @@ def post_likes_count(request, post):
     
 def delete_post_service(group, thread, post, user):
     # Check if the user is allowed to delete the post (moderator or author)
-    if user in group.moderators.all() or post.author == user:
+    if user in group.moderators.all() or post.author == user or user.is_admin or user.id == group.owner.id :
         post.delete()
         return True
     else:

@@ -36,12 +36,17 @@
                             {% if current_user == profile %}
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:edit' current_user.id %}" class="btn btn-primary btn-block">Upravit profil</a>
+                                        <a href="{% url 'users:edit' current_user.id %}" class="btn btn-primary btn-block">Change profile</a>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:change_password' current_user.id %}" class="btn btn-primary btn-block">Změnit heslo</a>
+                                        <a href="{% url 'users:change_password' current_user.id %}" class="btn btn-primary btn-block">Change password</a>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-center mt-3">
+                                    <div class="col-md-6">
+                                        <a href="{% url 'users:delete_self' current_user.id %}" class="btn btn-primary btn-block">Delete account</a>
                                     </div>
                                 </div>
                             {% endif %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Profile
-from .services import user_get_by_id, user_remove, user_is_logged
+from .services import user_get_by_id, user_remove, user_is_logged, user_logout
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from .services import user_get_by_id, verify_password
@@ -36,14 +36,28 @@ def list_users(request):
 
     return render(request, 'users/all_users.html', {'profiles': profiles, 'request': request})
 
+def delete_self(request, user_id):
+    profile = user_get_by_id(request, user_id)
+    if request.method == "POST":
+        user_remove(request, profile.id)  # This will delete the User and the associated Profile
+        user_logout(request)
+        return redirect('home')
+    form_action = reverse('users:delete_self', kwargs={'user_id': user_id})
+    return render(request, 'users/confirm_delete.html', {'form_action': form_action})
 
 def delete_user(request, user_id):
     profile = user_get_by_id(request, user_id)
     if request.method == "POST":
+        print("dsa")
         user_remove(request, profile.id)  # This will delete the User and the associated Profile
         profiles = Profile.objects.all()
         return render(request, 'users/all_users.html', {'profiles': profiles})
-    return render(request, 'users/confirm_delete.html', {'profile': profile})
+    cur_user = user_get_by_id(request, request.session['user_id'])
+    if user_id != cur_user.id:
+        form_action = reverse('users:delete_user', kwargs={'user_id': user_id})
+    else:
+        form_action = reverse('users:delete_self', kwargs={'user_id': user_id})
+    return render(request, 'users/confirm_delete.html', {'form_action': form_action})
 
     
 def change_password(request, user_id):
