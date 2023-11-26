@@ -3,7 +3,7 @@
   <div class="row justify-content-center">
     <div class="col-md-8">
       {% if not thread %}
-      <div class="alert alert-danger" role="alert">Vlákno neexistuje.</div>
+      <div class="alert alert-danger" role="alert">Thread doesn't exist.</div>
       {% else %}
       <div class="card text-channel">
         <div class="card-header">
@@ -15,7 +15,7 @@
             <div class="message-avatar">
               <!-- Optional: You can include an avatar image here -->
               <img
-                src="{{ post.author.image_url }}"
+                src="{{ post.author.profile_picture_url }}"
                 alt="{{ post.author.username }}"
               />
             </div>
@@ -56,32 +56,62 @@
                 >{{ post.likes_down }}</span
               >
             </div>
+             <!-- Edit and Delete buttons for moderators -->
+
+          
+            {% if current_user in group.moderators.all or current_user == group.owner or current_user.is_admin %}
+            <form action="{% url 'groups:threads:delete_post' group_id=group.id thread_id=thread.id post_id=post.id %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return;">Delete</button>
+            </form>
+            {% endif %}    
           </div>
 
           {% endfor %} {% else %}
           <div class="alert alert-info" role="alert" id="no-messages-yet">
-            Žádné zprávy.
+            No messages.
           </div>
           {% endif %}
         </div>
+
+        {% if current_user in group.members.all or current_user.is_admin or current_user.id is group.owner.id %}
+          <div class="card-footer">
+            <textarea id="messageInput" class="form-control" placeholder="Type a message..." rows="2"></textarea>
+            <button id="sendButton" class="btn btn-primary mt-2">Send</button>
+          </div>
+        {% elif current_user %}
+          <div class="card-footer">
+            <div class="alert alert-info" role="alert">
+              You have to be a member of the group before posting.
+            </div>
+          </div>
+        {% else %}
         <div class="card-footer">
-          <textarea
-            id="messageInput"
-            class="form-control"
-            placeholder="Type a message..."
-            rows="2"
-          ></textarea>
-          <button id="sendButton" class="btn btn-primary mt-2">Send</button>
+          <div class="alert alert-info" role="alert">
+            You have to <a href="{% url 'login' %}">sign in</a> in before posting.
+          </div>
         </div>
+        {% endif %}
+
       </div>
       {% endif %}
     </div>
   </div>
 </div>
 
+{% comment %} Simple JavaScript code to send a message when the user presses Enter key: {% endcomment %}
+<script>
+  document.getElementById('messageInput').addEventListener('keypress', function(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault(); // Prevents the default action of Enter key (sending message)
+          document.getElementById('sendButton').click(); // Triggers click on the send button
+      }
+  });
+</script>
+
 <script>
   let shownMessages = {};
-
+  
   document.addEventListener("DOMContentLoaded", (event) => {
     document
       .getElementById("sendButton")

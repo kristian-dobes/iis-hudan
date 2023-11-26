@@ -16,7 +16,7 @@ def register(request):
         if user_register(request, username, password, password2):
             return redirect('home')
         else:
-            return render(request, 'register.html', {'error': 'Chyba při registraci'})
+            return render(request, 'register.html', {'error': 'Error during sign up'})
     
     return render(request, 'register.html')
 
@@ -31,7 +31,7 @@ def login(request):
             print("Logged in.")
             return redirect('home')
         else:
-            return render(request, 'login.html', {'error': 'Uživatel neexistuje'})
+            return render(request, 'login.html', {'error': 'Invalid username or password'})
     
     return render(request, 'login.html')
 

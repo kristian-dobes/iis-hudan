@@ -12,27 +12,27 @@
         </div>
         {% endif %}
 
-        <h1 class="mb-4">Registrace</h1>
+        <h1 class="mb-4">Sign up</h1>
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="username">Přezdívka:</label>
+                <label for="username">Username:</label>
                 <input type="text" class="form-control" id="username" name="username" required>
             </div>
             <div class="form-group">
-                <label for="password">Heslo:</label>
+                <label for="password">Password:</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="form-group">
-                <label for="password2">Opakování hesla:</label>
+                <label for="password2">Confirm password:</label>
                 <input type="password" class="form-control" id="password2" name="password2" required>
             </div>
             <div class="form-group row">
                 <div class="col-sm-6 text-left">
-                    <input type="submit" class="btn btn-primary" value="Zaregistrovat se">
+                    <input type="submit" class="btn btn-primary" value="Sign up">
                 </div>
                 <div class="col-sm-6 text-right">
-                    <p>Již máš účet? <a href="/login/">Přihlas se</a></p>
+                    <p>Already have an account? <a href="/login/">Sign in</a></p>
                 </div>
             </div>
         </form>

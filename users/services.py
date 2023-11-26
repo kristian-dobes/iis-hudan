@@ -51,3 +51,13 @@ def user_get_by_id(request, user_id):
         return Profile.objects.get(id=user_id)
     except Profile.DoesNotExist:
         return None
+    
+def user_remove(request, user_id):
+    print("here?")
+    try:
+        user = Profile.objects.get(id=user_id)
+        user.delete()
+        print("deleted")
+        return True
+    except Profile.DoesNotExist:
+        return False

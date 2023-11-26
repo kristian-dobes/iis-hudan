@@ -1,0 +1,76 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <!-- Display error message if exists -->
+      {% if error %}
+      <div class="alert alert-danger" role="alert">{{ error }}</div>
+      {% endif %}
+
+      <h1 class="mb-4">Edit {{ profile.username }}'s profile</h1> {% comment %}TODO better title{% endcomment %}
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- User profile Name -->
+        <div class="form-user">
+          <label for="name">User:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            value="{{ profile.username }}"
+          />
+        </div>
+
+        <!-- User Image URL -->
+        <div class="form-profile mt-3">
+          <label for="image_url">Image URL:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="image_url"
+            name="image_url"
+            value="{{ profile.profile_picture_url }}"
+          />
+        </div>
+
+        <!-- User Bio -->
+        <div class="form-proifle mt-3">
+          <label for="bio">Bio:</label>
+          <textarea
+            class="form-control"
+            id="bio"
+            name="bio"
+            rows="4"
+            value="{{current_user.bio}}">{{current_user.bio}}</textarea>
+        </div>
+
+        <!-- Profile Visibility Section -->
+        <div class="form-profile mt-3">
+          <label>Profile Visibility:</label>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="visibility" id="visibilityEveryone" value="1" {% if current_user.visibility == 1 %}checked{% endif %}>
+            <label class="form-check-label" for="visibilityEveryone">Visible to everyone</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="visibility" id="visibilityRegistered" value="2" {% if current_user.visibility == 2 %}checked{% endif %}>
+            <label class="form-check-label" for="visibilityRegistered">Visible to registered users only</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="visibility" id="visibilityGroupMembers" value="3" {% if current_user.visibility == 3 %}checked{% endif %}>
+            <label class="form-check-label" for="visibilityGroupMembers">Visible to group members only</label>
+          </div>
+        </div>
+
+        <div class="form-profile mt-3">
+          <input type="submit" class="btn btn-primary" value="Save profile changes" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

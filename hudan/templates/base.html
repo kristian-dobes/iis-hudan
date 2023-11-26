@@ -33,20 +33,38 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{% url 'home' %}">Home</a>
                 </li>
+                {% if current_user.is_admin %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'users:list_users' %}">Users</a>
+
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'groups:list_groups' %}">Groups</a> 
+                </li>
+                {% endif %}
             </ul>
         </div>
         <div class="">
             <ul class="navbar-nav">
                 {% if current_user %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Odhlásit se</a>
+                    <a class="nav-link" href="{% url 'users:detail' current_user.id %}">
+                        <img
+                            src="{{ current_user.profile_picture_url }}" class="img-fluid rounded-circle"
+                            alt="{{ profile.username }}" style="max-height: 30px;max-width: 30px;"
+                        >
+                        {{current_user.username}}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Sign out</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Přihlásit se</a>
+                    <a class="nav-link" href="{% url 'login' %}">Sign in</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Registrovat</a>
+                    <a class="nav-link" href="{% url 'register' %}">Sign up</a>
                 </li>
                 {% endif %}
             </ul>            

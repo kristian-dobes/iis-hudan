@@ -15,16 +15,25 @@
             <h3>Skupiny</h3>
             <ul class="list-group">
                 {% for group in groups %}
+
+                {% if not current_user and group.content_visibility > 1 %}
+
+                {% else %}
                 <li class="list-group-item">
                     <a href="{% url 'groups:detail' group.id %}">
                         <img src="{{ group.image_url }}" class="img-fluid rounded-circle" alt="{{ group.title }}"
-                            style="max-width: 50px;">
+                            style="width: 50px; height: 50px;">
                         {{ group.title }}</a>
                 </li>
+
+                {% endif %}
+
                 {% endfor %}
+                {% if current_user %}
                 <li class="list-group-item">
-                    <a href="{% url 'groups:create' %}" class="btn btn-primary btn-block">Vytvořit skupinu</a>
+                    <a href="{% url 'groups:create' %}" class="btn btn-primary btn-block">Create group</a>
                 </li>
+                {% endif %}
             </ul>
         </div>
 

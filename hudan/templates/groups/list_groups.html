@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- templates/users/list_users.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Groups</title>
+
+</head>
+<body>
+    <h1>List of Groups</h1>
+    <form method="GET" action="{% url 'groups:list_groups' %}">
+        <input type="text" name="search" placeholder="Search groups..." value="{{ request.GET.search|default:'' }}" />
+        <button type="submit">Search</button>
+    </form>
+    <ul>
+        {% for group in groups %}
+            <li>
+                {{ group.title }}
+                <a href="{% url 'groups:edit' group_id=group.id %}">Edit</a> |
+                <a href="{% url 'groups:delete_group' group_id=group.id %}">Delete</a>
+            </li>
+        {% empty %}
+            <li>No groups found.</li>
+        {% endfor %}
+    </ul>
+   
+</body>
+</html>
+
+{% endblock %}

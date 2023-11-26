@@ -29,12 +29,6 @@ class Migration(migrations.Migration):
                 ("image_url", models.CharField(max_length=200)),
                 ("description", models.CharField(max_length=1024)),
                 (
-                    "administrators",
-                    models.ManyToManyField(
-                        related_name="administrators", to="users.profile"
-                    ),
-                ),
-                (
                     "owner",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE, to="users.profile"
