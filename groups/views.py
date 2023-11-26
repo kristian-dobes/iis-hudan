@@ -3,6 +3,7 @@ from .services import group_create, group_get_by_id, group_edit, group_get_threa
 from users.services import user_current, user_is_logged, user_get_by_id
 from threads.services import  thread_get_by_id
 from .models import Group
+from users.models import Profile
 
 # Create your views here.
 def detail(request, group_id):
@@ -77,11 +78,13 @@ def delete_group(request, group_id):
         return render(request, 'groups/list_groups.html', {'groups': groups})
     return render(request, 'groups/confirm_delete.html', {'group': group})
 
+
 def add_moderator_request(request, group_id, user_id):
     group = group_get_by_id(request, group_id)
     user = user_get_by_id(request, user_id)
     add_mod_request(request, group.id, user.id)
     return detail(request, group_id)
+
 
 def approve_moderator_request(request, group_id, user_id):
     group = group_get_by_id(request, group_id)
@@ -126,3 +129,20 @@ def delete_member(request, group_id, user_id):
     user = user_get_by_id(request, user_id)
     remove_member(request, group.id, user.id)
     return detail(request, group_id)
+
+def new_member(request, group_id):
+    group = group_get_by_id(request, group_id)
+    username =  request.POST['new_member']
+    user = Profile.objects.get(username=username)
+    add_member(request, group.id, user.id)
+    return detail(request, group_id)
+
+def new_mod(request, group_id):
+    group = group_get_by_id(request, group_id)
+    username =  request.POST['new_mod']
+    user = Profile.objects.get(username=username)
+    add_moderator(request, group.id, user.id)
+    if user not in group.members.all():
+        add_member(request, group.id, user.id)
+    return detail(request, group_id)
+
