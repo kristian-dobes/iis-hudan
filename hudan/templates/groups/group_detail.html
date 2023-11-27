@@ -87,13 +87,13 @@
               {% for thread in threads %}
               {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
               <!-- Editable thread title -->
-              <div class="thread-title" ondblclick="showEdit('{{ thread.id }}')">
-                <span class="title-text">{{ thread.title }}</span>
-                <form id="edit-form-{{ thread.id }}" action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" style="display: none;">
+              <div class="thread-title">
+                <span class="title-text btn btn-primary btn-block" style="width: 100px;" onclick="showEdit({{thread.id}})">Edit title</span>
+                <form id="edit-form-{{thread.id}}" action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" id="edit-form-{{thread.id}}" style="display: none;">
                   {% csrf_token %}
                   <input type="text" name="title" value="{{ thread.title }}" class="edit-input" required>
                   <button type="submit" class="btn-update-title">Update Title</button>
-                  <button type="button" onclick="hideEdit('{{ thread.id }}')" class="btn-cancel-edit">Cancel</button>
+                  <button type="button" onclick="hideEdit({{thread.id}})" class="btn-cancel-edit">Cancel</button>
                 </form>
               </div>
             {% endif %}
@@ -380,6 +380,19 @@ function sendRequest(url) {
 </script>
 
 <style>
+  .btn-custom-size {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    color: #ffffff; /* Text color */
+    background-color: #007bff; /* Button color - you can choose your preferred color */
+    border: 1px solid #007bff; /* Border color - same as background for a solid look */
+    border-radius: 5px; /* Rounded corners for the button */
+    cursor: pointer; /* Change cursor on hover to indicate it's clickable */
+    display: inline-block; /* Align with other inline elements */
+    text-align: center; /* Center the text inside the button */
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
+}
+ 
   .thread-title {
   display: flex;
   align-items: center;
