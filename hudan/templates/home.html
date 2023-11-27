@@ -33,11 +33,11 @@
 
                 {% endfor %}
 
-                <!-- {% if groups_count > 0 %}
+                {% if visible_groups == 0 %}
                 <div class="alert alert-info" role="alert">
-                    <strong>Žádné skupiny</strong>
+                    Žádné skupiny
                 </div>
-                {% endif %} -->
+                {% endif %}
 
                 {% if current_user %}
                 <li class="list-group-item">
