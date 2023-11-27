@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Profile
-from .services import user_get_by_id, user_remove, user_is_logged, user_logout, verify_password, user_current, change_password_service, profile_get_all
+from .services import user_get_by_id, user_remove, user_is_logged, user_logout, verify_password, user_current, user_edit, change_password_service, profile_get_all
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from groups.services import common_group
@@ -20,11 +20,16 @@ def detail(request, user_id):
 def edit(request, user_id):
     print(user_id)
     if request.method == 'POST':
-        user = user_get_by_id(request, user_id)
-        user.username = request.POST['username']
-        user.profile_picture_url = request.POST['image_url']
-        user.bio = request.POST['bio']
-        user.visibility = request.POST['visibility']
+        username = request.POST['username']
+        profile_picture_url = request.POST['image_url']
+        bio = request.POST['bio']
+        visibility = request.POST['visibility']
+        
+        if user_edit(request, user_id, username, profile_picture_url, bio, visibility):
+            return redirect('users:detail', user_id=user_id)
+        else:
+            user = user_get_by_id(request, user_id)
+            return render(request, 'users/edit_user.html', {'profile': user, 'error': 'Error during user edit'})
         
         user.save()
         return redirect('users:detail', user_id=user.id )

@@ -58,6 +58,15 @@ def group_edit(request, group_id, name, image_url, description, content_visibili
         group = Group.objects.get(id=group_id)
         if group.owner != user and not user.is_admin:
             raise Exception('User is not owner of the group')
+        
+        # Validate image_url if it is not empty
+        if image_url:
+            validate = URLValidator()
+            try:
+                validate(image_url)
+            except ValidationError as e:
+                raise Exception('Invalid image URL')
+            
         group.title = name
         group.image_url = image_url
         group.description = description
