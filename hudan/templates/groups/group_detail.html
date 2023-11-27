@@ -187,8 +187,8 @@
         <div class="row">
             <div class="col d-flex justify-content-between align-items-center">
                 <h2>List of Moderators</h2>
-                <!-- Only show add Mod if the current user is admin or the owner of the group -->
-                {% if current_user.is_admin or current_user == group.owner %}
+                <!-- Only show add Mod if the current user is admin  -->
+                {% if current_user.is_admin %}
                     <button id="addModButton" class="btn btn-primary">Add Moderator</button>
                 {% endif %}
             </div>
@@ -273,8 +273,8 @@
                 <h2>List of Members</h2>
             </div>
             <div class="col text-right">
-                <!-- Only show add member if the current user is admin or the owner of the group -->
-                {% if current_user.is_admin or current_user == group.owner %}
+                <!-- Only show add member if the current user is admin-->
+                {% if current_user.is_admin %}
                     <button id="addMemberButton" class="btn btn-primary">Add Member</button>
                 {% endif %}
             </div>

@@ -62,7 +62,6 @@ def create(request):
 def list_groups(request):
     search_query = request.GET.get('search', '')
     if search_query:
-        # Adjust the filter to match the attributes of your Profile model
         groups = Group.objects.filter(username__icontains=search_query)
     else:
         groups = group_get_all(request)
@@ -73,7 +72,7 @@ def list_groups(request):
 def delete_group(request, group_id):
     group = group_get_by_id(request, group_id)
     if request.method == "POST":
-        group_remove(request, group.id)  # This will delete the User and the associated Profile
+        group_remove(request, group.id)  
         groups = group_get_all(request)
         return render(request, 'groups/list_groups.html', {'groups': groups})
     return render(request, 'groups/confirm_delete.html', {'group': group})
