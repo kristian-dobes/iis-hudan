@@ -87,15 +87,14 @@
               {% for thread in threads %}
               {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
               <!-- Editable thread title -->
-              <div class="thread-title" ondblclick="showEdit(this)">
-                <span class="title-text">Edit title</span>
-                <form action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" style="display: none;">
+              <div class="thread-title" ondblclick="showEdit('{{ thread.id }}')">
+                <span class="title-text">{{ thread.title }}</span>
+                <form id="edit-form-{{ thread.id }}" action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" style="display: none;">
                   {% csrf_token %}
                   <input type="text" name="title" value="{{ thread.title }}" class="edit-input" required>
                   <button type="submit" class="btn-update-title">Update Title</button>
-                  <button type="button" onclick="hideEdit(this)" class="btn-cancel-edit">Cancel</button>
+                  <button type="button" onclick="hideEdit('{{ thread.id }}')" class="btn-cancel-edit">Cancel</button>
                 </form>
-     
               </div>
             {% endif %}
             <div class="d-flex align-items-center">
@@ -354,11 +353,13 @@
 <script>
   {% comment %} for showing and hiding the edit form {% endcomment %}
 function showEdit(threadId) {
-  document.getElementById('edit-form-' + threadId).style.display = 'block';
+  var form = document.getElementById('edit-form-' + threadId);
+  form.style.display = 'block';
 }
 
 function hideEdit(threadId) {
-    document.getElementById('edit-form-' + threadId).style.display = 'none';
+  var form = document.getElementById('edit-form-' + threadId);
+  form.style.display = 'none';
 }
 
 function sendRequest(url) {
