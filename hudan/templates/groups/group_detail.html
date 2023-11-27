@@ -87,7 +87,7 @@
           <div class="alert alert-info" role="alert">
            You do not have permission to view. Try to <a href="/login/">Sign in</a>
           </div>
-        {% elif group.content_visibility > 2 and current_user not in group.members.all and current_user.id is not group.owner.id %}
+        {% elif group.content_visibility > 2 and current_user not in group.members.all and current_user.id is not group.owner.id and not current_user.is_admin %}
           <div class="alert alert-info" role="alert">
             You do not have permission to view. You must be a member of this group.
           </div>

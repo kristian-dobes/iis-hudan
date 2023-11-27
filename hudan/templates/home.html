@@ -29,6 +29,13 @@
                 {% endif %}
 
                 {% endfor %}
+
+                <!-- {% if groups_count > 0 %}
+                <div class="alert alert-info" role="alert">
+                    <strong>Žádné skupiny</strong>
+                </div>
+                {% endif %} -->
+
                 {% if current_user %}
                 <li class="list-group-item">
                     <a href="{% url 'groups:create' %}" class="btn btn-primary btn-block">Create group</a>
