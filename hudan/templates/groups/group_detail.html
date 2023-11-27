@@ -115,7 +115,7 @@
         {% endif %}
       </div>
 
-      {%if is_user_admin or current_user.is_admin %}
+      {%if is_user_admin or current_user.is_admin or current_user in group.members.all %}
       <div class="container mt-5">
         <h2>Create thread</h2>
         <form

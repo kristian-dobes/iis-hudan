@@ -50,6 +50,12 @@ def group_get_all(request):
     except Group.DoesNotExist:
         return None
 
+def group_get_all_members(request, group):
+    try:
+        return group.members.all()
+    except Group.DoesNotExist:
+        return None
+
 def group_edit(request, group_id, name, image_url, description, content_visibility):
     try:
         user = user_current(request)
@@ -91,17 +97,14 @@ def group_is_user_administrator(request, group_id, user):
         return False
     
 def group_remove(request, group_id):
-    print("here?")
     try:
         group = Group.objects.get(id=group_id)
         group.delete()
-        print("deleted")
         return True
     except Group.DoesNotExist:
         return False
 
 def add_mod_request(request, group_id, user_id):
-    print("add_request")
     try:
         print(user_id)
         print(group_id)
