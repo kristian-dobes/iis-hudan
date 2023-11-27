@@ -7,17 +7,28 @@
       {% else %}
       <div class="card text-channel">
         <div class="card-header">
-          <h3>{{ thread.title }}</h3>
+          <span class="d-flex">
+            <button type="button" onclick="window.history.back()" class="btn">
+              <img src="{% static '/img/back.png' %}" width="20" height="20" class="d-inline-block align-top" alt="">
+            </button>
+            <h3 style="margin-left:10px;">{{ thread.title }}</h3>
+          </span>
         </div>
         <div class="card-body message-list">
           {% if posts %} {% for post in posts %}
           <div class="message" id="message-{{ post.id }}">
             <div class="message-avatar">
-              <!-- Optional: You can include an avatar image here -->
+              {% if post.author.profile_picture_url %}
               <img
                 src="{{ post.author.profile_picture_url }}"
                 alt="{{ post.author.username }}"
               />
+              {% else %}
+              <img
+                src="{% static 'img/anonymous.png' %}"
+                alt="{{ post.author.username }}"
+              />
+              {% endif %}
             </div>
             <div class="message-content">
               <strong>
@@ -30,7 +41,7 @@
               </strong>
               <p class="message-text">{{ post.content|linebreaksbr }}</p>
             </div>
-            <div class="message-likes">
+            <div class="message-likes d-flex h-50">
               <button
                 class="btn btn-primary btn-sm message-like-button"
                 id="likeButton-{{ post.id }}"
@@ -60,12 +71,18 @@
 
           
             {% if current_user in group.moderators.all or current_user == group.owner or current_user.is_admin %}
-            <form action="{% url 'groups:threads:delete_post' group_id=group.id thread_id=thread.id post_id=post.id %}" method="post" style="display: inline;">
+            <!-- <form action="{% url 'groups:threads:delete_post' group_id=group.id thread_id=thread.id post_id=post.id %}" method="post" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-sm" onclick="return;">Delete</button>
-            </form>
-            {% endif %}    
+            </form> -->
+            <button class="btn btn-delete btn-danger btn-sm message-delete-button h-50" id="deleteButton-{{ post.id }}">Delete</button>
+            {% endif %}
           </div>
+
+          <!-- If is not last -->
+          {% if not forloop.last %} 
+          <hr>
+          {% endif %}
 
           {% endfor %} {% else %}
           <div class="alert alert-info" role="alert" id="no-messages-yet">
@@ -181,6 +198,17 @@
         likePost(id, -1);
       });
     }
+
+    {% if current_user in group.moderators.all or current_user == group.owner or current_user.is_admin %}
+    // Delete button
+    let deleteButtons = document.querySelectorAll(".message-delete-button");
+    for (let deleteButton of deleteButtons) {
+      deleteButton.addEventListener("click", function () {
+        let id = deleteButton.id.split("-")[1];
+        deletePost(id);
+      });
+    }
+    {% endif %}
   });
 
   function likePost(id, val) {
@@ -212,6 +240,42 @@
         console.error("An error occurred: ", error);
       });
   }
+
+  {% if current_user in group.moderators.all or current_user == group.owner or current_user.is_admin %}
+  function deletePost(id) {
+    fetch(
+      '{% url "groups:threads:delete_post" group_id=group.id thread_id=thread.id post_id=0 %}'.replace(
+        "0",
+        id
+      ),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: new URLSearchParams({
+          post_id: id,
+        }),
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+        return response.text();
+      })
+      .then((data) => {
+        let messageElement = document.getElementById("message-" + id);
+        // Remove hr
+        messageElement.previousSibling.remove();
+        messageElement.remove();
+      })
+      .catch((error) => {
+        console.error("An error occurred: ", error);
+      });
+  }
+  {% endif %}
 
   function fetchMessages() {
     fetch(
@@ -261,9 +325,12 @@
       shownMessages[message.id] = true;
       let messageElement = document.createElement("div");
       messageElement.classList.add("message");
+      const profilePictureUrl = message.author_profile_picture_url
+        ? message.author_profile_picture_url
+        : "{% static 'img/anonymous.png' %}";
       messageElement.innerHTML = `
         <div class="message-avatar">
-          <img src="${message.author_profile_picture_url}" alt="${message.author}" />
+          <img src="${profilePictureUrl}" alt="${message.author}" />
         </div>
         <div class="message-content">
           <strong>
@@ -273,7 +340,7 @@
           </strong>
           <p class="message-text">${message.content}</p>
         </div>
-        <div class="message-likes">
+        <div class="message-likes d-flex h-50">
           <button
             class="btn btn-primary btn-sm message-like-button"
             id="likeButton-${message.id}"
@@ -296,8 +363,21 @@
             />
           </button>
           <span id="likeCountDown-${message.id}">${message.likes_down}</span>
+      `;
+      {% if current_user in group.moderators.all or current_user == group.owner or current_user.is_admin %}
+      
+      messageElement.innerHTML += `
+      <button
+      class="btn btn-delete btn-danger btn-sm message-delete-button h-50"
+      id="deleteButton-${message.id}"
+    >Delete</button>
+      `;
+      {% endif %}  
+      messageElement.innerHTML += `
         </div>
       `;
+      messageElement.id = "message-" + message.id;
+      messageList.appendChild(document.createElement("hr"));
       messageList.appendChild(messageElement);
       let likeButton = messageElement.querySelector(".message-like-button");
       likeButton.addEventListener("click", function () {
@@ -311,6 +391,13 @@
         let id = dislikeButton.id.split("-")[1];
         likePost(id, -1);
       });
+      {% if current_user in group.moderators.all or current_user == group.owner or current_user.is_admin %}
+      let deleteButton = messageElement.querySelector(".message-delete-button");
+      deleteButton.addEventListener("click", function () {
+        let id = deleteButton.id.split("-")[1];
+        deletePost(id);
+      });
+      {% endif %}
     }
     messageList.scrollTop = messageList.scrollHeight;
   }
@@ -369,7 +456,7 @@
 
   .message-text {
     margin: 2px 0;
-    color: #2c2c2c;
+    color: #363636;
   }
 
   .btn-like {
@@ -380,6 +467,10 @@
   .message-like-button,
   .message-dislike-button {
     margin-left: 10px;
+  }
+
+  #sendButton {
+    width: 100%;
   }
 </style>
 {% endblock %}

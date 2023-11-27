@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
@@ -12,7 +13,12 @@
             {% else %}
                 <div class="card">
                     <div class="card-header">
-                        <h3>User: {{ profile.username }}</h3>
+                        <span class="d-flex">
+                            <button type="button" onclick="window.history.back()" class="btn">
+                              <img src="{% static '/img/back.png' %}" width="20" height="20" class="d-inline-block align-top" alt="">
+                            </button>
+                            <h3 style="margin-left:10px;">{{ profile.username }}</h3>
+                          </span>
                     </div>
                     {% if profile.visibility > 1 and not current_user %}
                         <div class="card-body">
@@ -30,29 +36,38 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-4 text-center">
-                                    <img src="{{ profile.profile_picture_url }}" class="img-fluid rounded-circle"
-                                        alt="{{ profile.username }}" style="max-width: 100px;max-width: 100px;">
+                                    {% if profile.profile_picture_url %}
+                                        <img src="{{ profile.profile_picture_url }}" class="rounded-circle" width="200" height="200" alt="">
+                                    {% else %}
+                                        <img src="{% static 'img/anonymous.png' %}" class="rounded-circle" width="200" height="200" alt="">
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-8">
                                     <h4 class="mb-3">Bio:</h4>
-                                    <p>{{ profile.bio }}</p>
+                                    {% if profile.bio %}
+                                        <p>{{ profile.bio }}</p>
+                                    {% else %}
+                                    <div class="alert alert-info" role="alert">
+                                        This user has not written a bio yet.
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             <!-- Edit button -->
                             {% if current_user == profile or current_user.is_admin %}
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:edit' current_user.id %}" class="btn btn-primary btn-block">Edit profile</a>
+                                        <a href="{% url 'users:edit' profile.id %}" class="btn btn-primary btn-block">Edit profile</a>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:change_password' current_user.id %}" class="btn btn-primary btn-block">Change password</a>
+                                        <a href="{% url 'users:change_password' profile.id %}" class="btn btn-primary btn-block">Change password</a>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:delete_self' current_user.id %}" class="btn btn-danger btn-block">Delete account</a>
+                                        <a href="{% url 'users:delete_self' profile.id %}" class="btn btn-danger btn-block">Delete account</a>
                                     </div>
                                 </div>
                             {% endif %}

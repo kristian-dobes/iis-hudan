@@ -1,5 +1,7 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.sessions.models import Session
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from .models import Profile
 
 def hash_password(raw_password):
@@ -17,6 +19,7 @@ def user_register(request, username, password, password2):
             return False
         else:
             user = Profile.objects.create(username=username, password=hash_password(password))
+            request.session['user_id'] = user.id
             return True
 
 def user_login(request, username, password):
@@ -27,11 +30,39 @@ def user_login(request, username, password):
 
     # Check if the provided password matches the hash stored in the database
     if verify_password(password, user.password):
-        # If you want to use Django's sessions, you can still do that
+        # Use Django's sessions
         request.session['user_id'] = user.id
         return True
     
     return False
+
+def user_edit(request, user_id, username, profile_picture_url, bio, visibility):
+    try:
+        user = Profile.objects.get(id=user_id)
+        curr_user = user_current(request)
+        if curr_user is None:
+            raise Exception('User is not logged in')
+        if user != curr_user and not curr_user.is_admin:
+            raise Exception('User does not have permission to edit this profile')
+        user.username = username
+        
+        # Validate profile_picture_url if it is not empty
+        if profile_picture_url:
+            validate = URLValidator()
+            try:
+                validate(profile_picture_url)
+            except ValidationError as e:
+                raise Exception('Invalid image URL')
+        
+        user.profile_picture_url = profile_picture_url
+        user.bio = bio
+        user.visibility = visibility
+        user.save()
+        return True
+    except Profile.DoesNotExist:
+        return False
+    except Exception as e:
+        return False
 
 def profile_get_all(request):
     try:

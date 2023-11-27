@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
@@ -31,6 +32,11 @@
                     {% for profile in profiles %}
                     <tr>
                         <td>
+                            {% if profile.profile_picture_url %}
+                            <img src="{{ profile.profile_picture_url }}" class="rounded-circle" width="30" height="30" alt="">
+                            {% else %}
+                            <img src="{% static 'img/anonymous.png' %}" class="rounded-circle" width="30" height="30" alt="">
+                            {% endif %}
                             <a href="{% url 'users:detail' user_id=profile.id %}">{{ profile.username }}</a>
                         </td>
                         <td>

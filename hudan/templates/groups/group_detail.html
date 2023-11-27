@@ -1,4 +1,6 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
 
 <div class="container mt-5">
   <div class="row justify-content-center">
@@ -7,9 +9,25 @@
       <div class="alert alert-danger" role="alert">Group doesn't exist.</div>
     {% else %}
       <div class="card">
-        <div class="card-header">
-          <h3>{{ group.title }}</h3>
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="d-flex justify-content-between align-items-center">
+            <button type="button" onclick="window.history.back()" class="btn">
+              <img src="{% static '/img/back.png' %}" width="20" height="20" class="d-inline-block align-top" alt="">
+            </button>
+            <h3 style="margin-left:10px;">{{ group.title }}</h3>
+          </span>
+          {% if current_user == group.owner or current_user.is_admin %}
+              <a
+                href="{% url 'groups:edit' group_id=group.id %}"
+                class="btn btn-primary"
+                >Edit group</a
+              >
+          {% endif %}
+          {% if not current_user == group.owner and current_user in group.members.all and current_user %}
+          <button type="button" onclick="sendRequest('{% url 'groups:delete_member' group_id=group.id user_id=current_user.id %}')" class="btn btn-danger">Leave group</button>
+          {% endif %}
         </div>
+        
         <div class="card-body">
           <div class="row">
             <div class="col-md-4 text-center">
@@ -27,44 +45,24 @@
               <ul class="navbar-nav">  
                 <li class="nav-item d-flex align-items-center">
                     <a href="{% url 'users:detail' user_id=group.owner.id %}">
-                        <img src="{{ group.owner.profile_picture_url }}" class="img-fluid rounded-circle me-2" alt="{{ group.owner.username }}" style="height: 35px; width: 35px;">
+                      {% if group.owner.profile_picture_url %}
+                      <img src="{{ group.owner.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% else %}
+                      <img src="{% static 'img/anonymous.png' %}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% endif %}
                         <span>{{ group.owner.username }}</span>
                     </a>
                 </li>
               </ul>
             </div>
           </div>
-          <!-- Edit button -->
-          {% if current_user == group.owner or current_user.is_admin %}
-          <div class="row justify-content-center mt-3">
-            <div class="col-md-6">
-              <a
-                href="{% url 'groups:edit' group_id=group.id %}"
-                class="btn btn-primary btn-block"
-                >Edit group</a
-              >
-            </div>
-          </div>
-          {% endif %}
         </div>
       </div>
 
-
-      {% if not current_user == group.owner and current_user in group.members.all and current_user %}
-      <div class="container mt-5">
-        <form method="post" action="{% url 'groups:delete_member' group_id=group.id user_id=current_user.id %}">
-          {% csrf_token %}
-          <div class="form-group">
-              <button type="submit" class="btn btn-primary btn-block">Leave group</button>
-          </div>
-        </form>
-      </div>
-      {% endif %}
-
-      {% if not current_user == group.owner and current_user not in group.moderators.all and current_user in group.members.all and current_user %}
+      {% if not current_user.is_admin and not current_user == group.owner and current_user not in group.moderators.all and current_user in group.members.all and current_user %}
       <div class="container mt-5">
         <h2>Become Moderator</h2>
-        <form method="post" action="{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}">
+        <!-- <form method="post" action="{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}">
           {% csrf_token %}
           <div class="form-group">
             {% if current_user not in group.requested_for_moderator.all%}
@@ -73,73 +71,60 @@
               <button type="submit" disabled class="btn btn-primary btn-block">Send Request</button>
             {% endif %}
             </div>
-        </form>
+        </form> -->
+        <button
+        {% if current_user not in group.requested_for_moderator.all%} {%else%} disabled {%endif%}
+        type="button" onclick="sendRequest('{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}')" class="btn btn-primary btn-block">Send Request</button>
       </div>
       {% endif %}
 
-      {% if current_user.is_admin or current_user == group.owner %}
-      <div class="container mt-5">
-        <h2>Moderator Requests</h2>
-        {% if group.requested_for_moderator.all %}
-          <ul class="list-group">
-            {% for requester in group.requested_for_moderator.all %}
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="{% url 'users:detail' user_id=requester.id %}">
-                  <img src="{{ requester.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
-                  <span>{{ requester.username }}</span>
-                </a>
-                <div>
-                  <a href="{% url 'groups:approve_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-success btn-sm">Approve</a>
-                  <a href="{% url 'groups:reject_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-danger btn-sm">Reject</a>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-      </div>
-          <div class="alert alert-info" role="alert">No moderator requests.</div>
-        {% endif %}
-      {% endif %}
+
       
+
       <div class="container mt-5">
-      <h2>List of Moderators</h2>
-              <div class="col text-right">
-                <!-- Only show add Mod if the current user is admin or the owner of the group -->
-                {% if current_user.is_admin or current_user == group.owner %}
-                    <button id="addModButton" class="btn btn-primary">Add Moderator</button>
-                {% endif %}
+        <h2>Threads</h2>
+        {% if group.content_visibility > 1 and not current_user %}
+          <div class="alert alert-info" role="alert">
+           You do not have permission to view. Try to <a href="/login/">Sign in</a>
+          </div>
+        {% elif group.content_visibility > 2 and current_user not in group.members.all and current_user.id is not group.owner.id %}
+          <div class="alert alert-info" role="alert">
+            You do not have permission to view. You must be a member of this group.
+          </div>
+        {%else%}
+          {% if threads %}
+            <div class="list-group">
+              {% for thread in threads %}
+              {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
+              <!-- Editable thread title -->
+              <div class="thread-title" ondblclick="showEdit(this)">
+                <span class="title-text">Edit title</span>
+                <form action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" style="display: none;">
+                  {% csrf_token %}
+                  <input type="text" name="title" value="{{ thread.title }}" class="edit-input" required>
+                  <button type="submit" class="btn-update-title">Update Title</button>
+                  <button type="button" onclick="hideEdit(this)" class="btn-cancel-edit">Cancel</button>
+                </form>
+                <!-- <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}" class="btn-delete-thread">Delete thread</a> -->
+                <!-- <button type="button" onclick="sendRequest('{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}')" class="btn-delete-thread">Delete thread</button> -->
               </div>
-
-        <!-- Form to Add a New Mod -->
-              {% if error_mod %}
-              <div class="alert alert-danger" role="alert">{{ error_mod }}</div>
+            {% endif %}
+            <div class="d-flex align-items-center">
+              <a href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}" class="list-group-item list-group-item-action flex-grow-1">{{ thread.title }}</a>
+              
+              {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
+              <button type="button" onclick="sendRequest('{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}')" class="btn btn-sm btn-outline-danger ml-2">Delete thread</button>
               {% endif %}
-              <div id="addModForm" style="display: none; margin-top: 15px;">
-                  <form method="post" action="{% url 'groups:new_mod' group_id=group.id %}">
-                      {% csrf_token %}
-                      <div class="form-group">
-                          <input type="text" class="form-control" id="new_mod" name="new_mod" placeholder="Enter username" required>
-                      </div>
-                      <button type="submit" class="btn btn-success">Add</button>
-                  </form>
-              </div>
-        {% for mod in group.moderators.all %}
-            <li>
-              <a href="{% url 'users:detail' user_id=mod.id %}">
-                <img src="{{ mod.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
-                <span>{{ mod.username }}</span>
-              </a>
-
-                {% if current_user.is_admin or current_user == group.owner %}
-                  <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Revoke</a>
-                {% elif current_user in group.moderators.all and current_user.id == mod.id%}
-                  <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Rescind</a>
-                {% endif %}
-            </li>
-        {% empty %}
-            <li>No moderators found.</li>
-        {% endfor %}
-      </ul>
+            </div>
+              
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+              Group has no threads.
+            </div>
+          {% endif %}
+        {% endif %}
       </div>
 
       {%if is_user_admin or current_user.is_admin %}
@@ -167,65 +152,11 @@
       </div>
       {% endif %}
 
-      <div class="container mt-5">
-        <h2>Threads</h2>
-        {% if group.content_visibility > 1 and not current_user %}
-          <div class="alert alert-info" role="alert">
-           You do not have permission to view. Try to <a href="/login/">Sign in</a>
-          </div>
-        {% elif group.content_visibility > 2 and current_user not in group.members.all and current_user.id is not group.owner.id %}
-          <div class="alert alert-info" role="alert">
-            You do not have permission to view. You must be a member of this group.
-          </div>
-        {%else%}
-          {% if threads %}
-          <div class="list-group">
-              {% for thread in threads %}
-                  <!-- Thread item with Edit and Delete options -->
-                  <div class="list-group-item">
-                      <div class="d-flex justify-content-between">
-                          <div>
-                              <!-- Thread title and link -->
-                              <a href="{% url 'groups:threads:detail' group_id=group.id thread_id=thread.id %}" class="font-weight-bold text-decoration-none">
-                                  {{ thread.title }}
-                              </a>
-                          </div>
-          
-                          <!-- Edit and Delete buttons are always visible now -->
-                          {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
-                          <div>
-                              <button onclick="showEdit({{ thread.id }})" class="btn btn-sm btn-outline-primary">Edit</button>
-                              <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-                          </div>
-                          {% endif %}
-                      </div>
-          
-                      <!-- Hidden form for editing the title -->
-                      <form id="edit-form-{{ thread.id }}" action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="mt-2" style="display: none;">
-                          {% csrf_token %}
-                          <input type="text" name="title" value="{{ thread.title }}" class="form-control mb-2" required>
-                          <button type="submit" class="btn btn-sm btn-primary">Update Title</button>
-                          <button type="button" onclick="hideEdit({{ thread.id }})" class="btn btn-sm btn-secondary">Cancel</button>
-                      </form>
-                  </div>
-              {% endfor %}
-          </div>
-          {% else %}
-              <div class="alert alert-info" role="alert">
-                  Group has no threads.
-              </div>
-          {% endif %}
-        
-        
-        
-        {% endif %}
-      </div>
-
 
       {% if not current_user == group.owner and current_user not in group.members.all and current_user %}
       <div class="container mt-5">
         <h2>Become a member of the group!</h2>
-        <form method="post" action="{% url 'groups:add_member_request' group_id=group.id user_id=current_user.id %}">
+        <!-- <form method="post" action="{% url 'groups:add_member_request' group_id=group.id user_id=current_user.id %}">
           {% csrf_token %}
           <div class="form-group">
             {% if current_user not in group.requested_to_join.all%}
@@ -234,9 +165,69 @@
               <button type="submit" disabled class="btn btn-primary btn-block">Send Request to join group</button>
             {% endif %}
           </div>
-        </form>
+        </form> -->
+        <button
+        {% if current_user not in group.requested_to_join.all%} {%else%} disabled {%endif%}
+        type="button" onclick="sendRequest('{% url 'groups:add_member_request' group_id=group.id user_id=current_user.id %}')" class="btn btn-primary btn-block">Send Request to join group</button>
       </div>
       {% endif %}
+
+
+      
+      {% if current_user.is_admin or current_user == group.owner %}
+      <div class="container mt-5">
+        <h2>Moderator Requests</h2>
+        {% if group.requested_for_moderator.all %}
+          <ul class="list-group">
+            {% for requester in group.requested_for_moderator.all %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'users:detail' user_id=requester.id %}">
+                  {% if requester.profile_picture_url %}
+                      <img src="{{ requester.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% else %}
+                      <img src="{% static 'img/anonymous.png' %}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                  {% endif %}
+                  <span>{{ requester.username }}</span>
+                </a>
+                <div>
+                  <!-- <a href="{% url 'groups:approve_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-success btn-sm">Approve</a>
+                  <a href="{% url 'groups:reject_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-danger btn-sm">Reject</a> -->
+                  <button type="button" onclick="sendRequest('{% url 'groups:approve_moderator' group_id=group.id user_id=requester.id %}')" class="btn btn-success btn-sm">Approve</button>
+                  <button type="button" onclick="sendRequest('{% url 'groups:reject_moderator' group_id=group.id user_id=requester.id %}')" class="btn btn-danger btn-sm">Reject</button>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+      </div>
+          <div class="alert alert-info" role="alert">No moderator requests.</div>
+        {% endif %}
+      {% endif %}
+      
+      <div class="container mt-5">
+      <h2>List of Moderators</h2>
+      <ul>
+        {% for mod in group.moderators.all %}
+            <li>
+              <a href="{% url 'users:detail' user_id=mod.id %}">
+                {% if mod.profile_picture_url %}
+                      <img src="{{ mod.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% else %}
+                      <img src="{% static 'img/anonymous.png' %}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% endif %}
+                <span>{{ mod.username }}</span>
+              </a>
+
+                {% if current_user.is_admin or current_user == group.owner %}
+                  <!-- <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Remove</a> -->
+                  <button type="button" onclick="sendRequest('{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}')" class="btn btn-danger btn-sm">Remove</button>
+                  {% endif %}
+            </li>
+        {% empty %}
+            <li>No moderators found.</li>
+        {% endfor %}
+      </ul>
+      </div>
 
       {% if current_user.is_admin or current_user == group.owner %}
       <div class="container mt-5">
@@ -248,12 +239,18 @@
             {% for requester in group.requested_to_join.all %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
                 <a href="{% url 'users:detail' user_id=requester.id %}">
-                  <img src="{{ requester.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                  {% if requester.profile_picture_url %}
+                      <img src="{{ requester.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% else %}
+                      <img src="{% static 'img/anonymous.png' %}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% endif %}
                   <span>{{ requester.username }}</span>
                 </a>
                 <div>
-                  <a href="{% url 'groups:approve_member' group_id=group.id user_id=requester.id %}" class="btn btn-success btn-sm">Approve</a>
-                  <a href="{% url 'groups:reject_member' group_id=group.id user_id=requester.id %}" class="btn btn-danger btn-sm">Reject</a>
+                  <!-- <a href="{% url 'groups:approve_member' group_id=group.id user_id=requester.id %}" class="btn btn-success btn-sm">Approve</a>
+                  <a href="{% url 'groups:reject_member' group_id=group.id user_id=requester.id %}" class="btn btn-danger btn-sm">Reject</a> -->
+                  <button type="button" onclick="sendRequest('{% url 'groups:approve_member' group_id=group.id user_id=requester.id %}')" class="btn btn-success btn-sm">Approve</button>
+                  <button type="button" onclick="sendRequest('{% url 'groups:reject_member' group_id=group.id user_id=requester.id %}')" class="btn btn-danger btn-sm">Reject</button>
                 </div>
               </li>
             {% endfor %}
@@ -301,13 +298,21 @@
               {% for member in group.members.all %}
                   <li>
                     <a href="{% url 'users:detail' user_id=member.id %}">
+                      {% if member.profile_picture_url %}
                       <img src="{{ member.profile_picture_url }}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% else %}
+                      <img src="{% static 'img/anonymous.png' %}" class="img-fluid rounded-circle me-2" style="height: 30px; width: 30px;">
+                      {% endif %}
                       <span>{{ member.username }}</span>
                     </a>
                       {% if current_user.is_admin or current_user == group.owner %}
-                        {% if not member.username == group.owner.username %}
-                          <a href="{% url 'groups:delete_member' group_id=group.id user_id=member.id %}" class="btn btn-danger btn-sm">Remove</a>
-                        {% endif %}
+                        {% if not member == group.owner %}
+                          <!-- <a href="{% url 'groups:delete_member' group_id=group.id user_id=member.id %}" class="btn btn-danger btn-sm">Remove</a> -->
+                          <button type="button" onclick="sendRequest('{% url 'groups:delete_member' group_id=group.id user_id=member.id %}')" class="btn btn-danger btn-sm">Remove</button>
+                        {%else%}
+                                <span class="badge bg-primary">Owner</span>
+                          {% endif %}
+
                       {% endif %}
                   </li>
               {% empty %}
@@ -323,8 +328,9 @@
   </div>
     
 </div>
+
 </div>
-</div>
+
 
 <script>
     document.getElementById('addMemberButton').addEventListener('click', function() {
@@ -348,6 +354,22 @@ function showEdit(threadId) {
 
 function hideEdit(threadId) {
     document.getElementById('edit-form-' + threadId).style.display = 'none';
+}
+
+function sendRequest(url) {
+  // If response code is 200, reload the page, otherwise log error
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}'
+    }
+  }).then(response => {
+    if (response.status === 200) {
+      location.reload();
+    } else {
+      console.error(response);
+    }
+  });
 }
 </script>
 
