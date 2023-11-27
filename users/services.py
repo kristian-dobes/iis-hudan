@@ -17,6 +17,7 @@ def user_register(request, username, password, password2):
             return False
         else:
             user = Profile.objects.create(username=username, password=hash_password(password))
+            request.session['user_id'] = user.id
             return True
 
 def user_login(request, username, password):
@@ -27,7 +28,7 @@ def user_login(request, username, password):
 
     # Check if the provided password matches the hash stored in the database
     if verify_password(password, user.password):
-        # If you want to use Django's sessions, you can still do that
+        # Use Django's sessions
         request.session['user_id'] = user.id
         return True
     

@@ -9,7 +9,7 @@ def detail(request, user_id):
     user = user_get_by_id(request, user_id)
     is_user_logged = user_is_logged(request)
     current_user = user_current(request)
-    any_common_group = common_group(request, user_id, current_user.id)
+    any_common_group = common_group(request, user_id, current_user.id) if is_user_logged else False
     
     return render(request, 'users/user_detail.html', {'profile': user, 'is_user_logged': is_user_logged, 'common_group': any_common_group})
 

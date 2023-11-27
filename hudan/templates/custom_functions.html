@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block custom_functions %}
+{% static 'img/anonymous.png' as anonymous_image %}
+
+{% def get_profile_picture_url user %}
+{% if user.profile_picture_url %}
+{{ user.profile_picture_url }}
+{% else %}
+{{ anonymous_image }}
+{% endif %}
+{% enddef %}
+{% endblock %}
