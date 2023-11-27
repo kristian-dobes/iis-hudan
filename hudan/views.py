@@ -43,4 +43,12 @@ def home(request):
     print("Redirected to home!")
     groups = group_get_all(request)
     print("Got all groups.")
-    return render(request, 'home.html', {'groups': groups})
+    visible_groups = 0
+    for group in groups:
+        # if not current_user and group.content_visibility > 1
+        if group.content_visibility > 1:
+            if not user_is_logged(request):
+                continue
+        visible_groups += 1
+    print("Visible groups: " + str(visible_groups))
+    return render(request, 'home.html', {'groups': groups, 'visible_groups': visible_groups})
