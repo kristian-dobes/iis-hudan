@@ -142,9 +142,13 @@ def remove_moderator(request, group_id, user_id):
         user = Profile.objects.get(id=user_id)
         group = Group.objects.get(id=group_id)
         group.moderators.remove(user)
+        print("kk")
+        print(user.id)
         group.save()
+        print("ll")
         return True
     except (Profile.DoesNotExist, Group.DoesNotExist):
+        print("ff")
         return False
 
 def add_memb_request(request, group_id, user_id):
