@@ -127,7 +127,7 @@
         {% endif %}
       </div>
 
-      {%if is_user_admin%}
+      {%if is_user_admin or current_user.is_admin %}
       <div class="container mt-5">
         <h2>Create thread</h2>
         <form
@@ -231,8 +231,10 @@
 
       {% if current_user.is_admin or current_user == group.owner %}
       <div class="container mt-5">
-        <h2>Memeber Requests</h2>
+        <h2>Member Requests</h2>
         {% if group.requested_to_join.all %}
+
+        
           <ul class="list-group">
             {% for requester in group.requested_to_join.all %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -259,10 +261,34 @@
         {% endif %}
       {% endif %}
 
-
       
       <div class="container mt-5">
-        <h2>List of Members</h2>
+        <div class="row">
+            <div class="col">
+                <h2>List of Members</h2>
+            </div>
+            <div class="col text-right">
+                <!-- Only show add member if the current user is admin or the owner of the group -->
+                {% if current_user.is_admin or current_user == group.owner %}
+                    <button id="addMemberButton" class="btn btn-primary">Add Member</button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Form to Add a New Member -->
+        {% if error_mem %}
+          <div class="alert alert-danger" role="alert">{{ error_mem }}</div>
+        {% endif %}
+        <div id="addMemberForm" style="display: none; margin-top: 15px;">
+            <form method="post" action="{% url 'groups:new_member' group_id=group.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" class="form-control" id="new_member" name="new_member" placeholder="Enter username" required>
+                </div>
+                <button type="submit" class="btn btn-success">Add</button>
+            </form>
+        </div>
+
         {% if group.content_visibility > 1 and not current_user %}
           <div class="alert alert-info" role="alert">
             You don't have permission to view group members. Try to <a href="/login/">Sign in</a>
@@ -307,15 +333,27 @@
 
 
 <script>
-  function showEdit(element) {
-  element.querySelector('.title-text').style.display = 'none';
-  element.querySelector('.edit-form').style.display = 'block';
+    document.getElementById('addMemberButton').addEventListener('click', function() {
+        var form = document.getElementById('addMemberForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+</script>
+
+<script>
+  document.getElementById('addModButton').addEventListener('click', function() {
+      var form = document.getElementById('addModForm');
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  });
+</script>
+
+<script>
+  {% comment %} for showing and hiding the edit form {% endcomment %}
+function showEdit(threadId) {
+  document.getElementById('edit-form-' + threadId).style.display = 'block';
 }
 
-function hideEdit(element) {
-  const editForm = element.closest('.edit-form');
-  editForm.style.display = 'none';
-  editForm.previousElementSibling.style.display = 'block';
+function hideEdit(threadId) {
+    document.getElementById('edit-form-' + threadId).style.display = 'none';
 }
 
 function sendRequest(url) {

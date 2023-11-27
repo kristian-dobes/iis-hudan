@@ -39,7 +39,7 @@
                   {{ post.author.username }}
                 </a>
               </strong>
-              <p class="message-text">{{ post.content }}</p>
+              <p class="message-text">{{ post.content|linebreaksbr }}</p>
             </div>
             <div class="message-likes d-flex h-50">
               <button

@@ -16,7 +16,7 @@ def register(request):
         if user_register(request, username, password, password2):
             return redirect('home')
         else:
-            return render(request, 'register.html', {'error': 'Error during sign up'})
+            return render(request, 'register.html', {'error': 'Username is already taken'})
     
     return render(request, 'register.html')
 

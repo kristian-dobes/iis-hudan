@@ -34,6 +34,13 @@ def user_login(request, username, password):
     
     return False
 
+def profile_get_all(request):
+    try:
+        return Profile.objects.all()
+    except Profile.DoesNotExist:
+        return None
+
+
 def user_logout(request):
     if 'user_id' in request.session:
         del request.session['user_id']
@@ -60,5 +67,19 @@ def user_remove(request, user_id):
         user.delete()
         print("deleted")
         return True
+    except Profile.DoesNotExist:
+        return False
+
+
+def change_password_service(request, password, password2, user_id):
+    try: 
+        user = Profile.objects.get(id=user_id)
+        if password != password2:
+            return False
+        else:
+            print(password)
+            user.password=hash_password(password)
+            user.save()
+            return True
     except Profile.DoesNotExist:
         return False

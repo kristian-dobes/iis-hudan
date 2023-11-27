@@ -21,7 +21,7 @@ def create(request, group_id):
     group = group_get_by_id(request, group_id)
     user = user_current(request)
     is_group_admin = group_is_user_administrator(request, group_id, user)
-    if not is_group_admin:
+    if not is_group_admin and not user.is_admin:
         print("Is not admin!")
         return redirect('groups:detail', group_id=group_id)
     if request.method == 'POST':

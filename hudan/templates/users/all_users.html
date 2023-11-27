@@ -3,13 +3,6 @@
 {% block content %}
 
 <!-- templates/users/list_users.html -->
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>List of Users</title>
-
 </head>
 <body>
     <h1>List of Users</h1>
@@ -17,18 +10,47 @@
         <input type="text" name="search" placeholder="Search users..." value="{{ request.GET.search|default:'' }}" />
         <button type="submit">Search</button>
     </form>
-    <ul>
-        {% for profile in profiles %}
-            <li>
-                {{ profile.username }}
-
-                <a href="{% url 'users:edit' user_id=profile.id %}">Edit</a> |
-                <a href="{% url 'users:delete_user' user_id=profile.id %}">Delete</a>
-            </li>
-        {% empty %}
-            <li>No users found.</li>
-        {% endfor %}
-    </ul>
+    <div class="container mt-5">
+        <h2>List of Users</h2>
+        
+        <!-- Check if there are profiles to display -->
+        {% if profiles %}
+            <table class="table">
+                <!-- Table Header -->
+                <thead>
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Set Password</th>
+                        <th scope="col">Edit</th>
+                        <th scope="col">Delete</th>
+                    </tr>
+                </thead>
+    
+                <!-- Table Body -->
+                <tbody>
+                    {% for profile in profiles %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'users:detail' user_id=profile.id %}">{{ profile.username }}</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'users:change_password' user_id=profile.id %}">Set Password</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'users:edit' user_id=profile.id %}">Edit</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'users:delete_user' user_id=profile.id %}">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No users found.</p>
+        {% endif %}
+    </div>
+    
    
 </body>
 </html>

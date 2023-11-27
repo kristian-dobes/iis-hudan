@@ -26,10 +26,10 @@
                                 You do not have permission to view this user's info. Try to <a href="/login/">Sign in</a>
                             </div>
                         </div>
-                    {% elif profile.visibility > 2 and not common_group %}
+                    {% elif profile.visibility > 2 and current_user and not common_group and current_user.id is not profile.id and not current_user.is_admin%}
                         <div class="card-body">
                             <div class="alert alert-info" role="alert">
-                                You do not have permission to view this user's info (you need to be in the same group).
+                                You do not have permission to view this user's info. You need to be in the same group.
                             </div>
                         </div>
                     {% else %}
@@ -54,7 +54,7 @@
                                 </div>
                             </div>
                             <!-- Edit button -->
-                            {% if current_user == profile %}
+                            {% if current_user == profile or current_user.is_admin %}
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
                                         <a href="{% url 'users:edit' current_user.id %}" class="btn btn-primary btn-block">Edit profile</a>

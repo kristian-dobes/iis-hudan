@@ -1,5 +1,7 @@
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.sessions.models import Session
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from groups.models import Group
 from users.models import Profile
 from threads.models import Thread
@@ -10,8 +12,20 @@ def group_create(request, name, image_url, description, content_visibility):
         user = user_current(request)
         if user is None:
             raise Exception('User is not logged in')
+        
+        # Validate image_url if it is not empty
+        if image_url:
+            validate = URLValidator()
+            try:
+                validate(image_url)
+            except ValidationError as e:
+                raise Exception('Invalid image URL')
+        
+        if image_url == '':
+            image_url = 'https://www.poszetka.com/data/include/img/news/1650028664.jpg'
+        
         group = Group.objects.create(
-            title=name, 
+            title=name,
             image_url=image_url, 
             description=description, 
             owner=user, 
@@ -42,7 +56,7 @@ def group_edit(request, group_id, name, image_url, description, content_visibili
         if user is None:
             raise Exception('User is not logged in')
         group = Group.objects.get(id=group_id)
-        if group.owner != user:
+        if group.owner != user and not user.is_admin:
             raise Exception('User is not owner of the group')
         group.title = name
         group.image_url = image_url
@@ -156,6 +170,8 @@ def remove_member(request, group_id, user_id):
     try:
         user = Profile.objects.get(id=user_id)
         group = Group.objects.get(id=group_id)
+        if user in group.moderators.all():
+            group.moderators.remove(user)
         group.members.remove(user)
         group.save()
         return True
@@ -176,4 +192,25 @@ def common_group(request, user1, user2):
         return False
     except:
         return False
+
+def add_moderator_username(request, group_id, username):
+    try:
+        user = Profile.objects.get(username=username)
+        group = Group.objects.get(id=group_id)
+        group.requested_for_moderator.remove(user)
+        group.moderators.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
     
+def add_member_username(request, group_id, username):
+    try:
+        user = Profile.objects.get(username=username)
+        group = Group.objects.get(id=group_id)
+        group.requested_to_join.remove(user)
+        group.members.add(user)
+        group.save()
+        return True
+    except (Profile.DoesNotExist, Group.DoesNotExist):
+        return False
