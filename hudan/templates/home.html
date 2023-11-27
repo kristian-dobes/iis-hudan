@@ -12,8 +12,11 @@
 
         <!-- Currently loaded group in the middle -->
         <div class="col-md-6">
-            <h3>Skupiny</h3>
+            <h3>Groups</h3>
+
+            
             <ul class="list-group">
+
                 {% for group in groups %}
 
                 {% if not current_user and group.content_visibility > 1 %}

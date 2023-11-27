@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .services import thread_get_by_id, thread_create, post_new, posts_in_thread, post_to_json, thread_changed, post_get_by_id, post_like, post_likes_count, delete_post_service, delete_thread_service, edit_thread_service
-from groups.services import group_get_by_id, group_is_user_administrator
+from groups.services import group_get_by_id, group_is_user_administrator, group_get_all_members
 from users.services import user_current
 from .models import Thread
 import json
@@ -21,7 +21,8 @@ def create(request, group_id):
     group = group_get_by_id(request, group_id)
     user = user_current(request)
     is_group_admin = group_is_user_administrator(request, group_id, user)
-    if not is_group_admin and not user.is_admin:
+    group_members = group_get_all_members(request, group)
+    if not is_group_admin and not user.is_admin and not user in group_members:
         print("Is not admin!")
         return redirect('groups:detail', group_id=group_id)
     if request.method == 'POST':

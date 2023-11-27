@@ -12,7 +12,12 @@ def detail(request, group_id):
     threads = group_get_threads(request, group_id)
     is_user_admin = group_is_user_administrator(request, group_id, user) 
     is_user_logged = user_is_logged(request)
-    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged})
+   
+    err_message = request.session["error_mod"] if "error_mod" in request.session else None
+    err_message2 = request.session["error_mem"] if "error_mem" in request.session else None
+    request.session["error_mod"] = None
+    request.session["error_mem"] = None
+    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged, "error_mod":err_message,  "error_mem":err_message2})
 
 def edit(request, group_id):
     if request.method == 'POST':
@@ -62,7 +67,6 @@ def create(request):
 def list_groups(request):
     search_query = request.GET.get('search', '')
     if search_query:
-        # Adjust the filter to match the attributes of your Profile model
         groups = Group.objects.filter(username__icontains=search_query)
     else:
         groups = group_get_all(request)
@@ -73,7 +77,7 @@ def list_groups(request):
 def delete_group(request, group_id):
     group = group_get_by_id(request, group_id)
     if request.method == "POST":
-        group_remove(request, group.id)  # This will delete the User and the associated Profile
+        group_remove(request, group.id)  
         groups = group_get_all(request)
         return render(request, 'groups/list_groups.html', {'groups': groups})
     return render(request, 'groups/confirm_delete.html', {'group': group})
@@ -100,6 +104,7 @@ def reject_moderator_request(request, group_id, user_id):
 
 
 def delete_moderator(request, group_id, user_id):
+    print("here")
     group = group_get_by_id(request, group_id)
     user = user_get_by_id(request, user_id)
     remove_moderator(request, group.id, user.id)
@@ -138,8 +143,10 @@ def new_member(request, group_id):
     is_user_admin = group_is_user_administrator(request, group_id, user) 
     is_user_logged = user_is_logged(request)
     if not add_member_username(request, group.id, username):
-            return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged,'error_mem': 'Error during user search'})
-    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged})
+        request.session['error_mem'] = "Error during user search"
+        return redirect('groups:detail', group_id=group.id)
+    return redirect('groups:detail', group_id=group.id)
+
 
 def new_mod(request, group_id):
     user = user_current(request)
@@ -149,9 +156,10 @@ def new_mod(request, group_id):
     is_user_admin = group_is_user_administrator(request, group_id, user) 
     is_user_logged = user_is_logged(request)
     add_moderator_username(request, group.id, username)
-
+    
     if not group.members.filter(username=username).exists():
         if not add_member_username(request, group.id, username):
-            return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged, 'error_mod': 'Error during user search'})
-    return render(request, 'groups/group_detail.html', {'group': group, 'threads': threads, 'is_user_admin': is_user_admin, 'is_user_logged': is_user_logged})
+            request.session['error_mod'] = "Error during user search"
+            return redirect('groups:detail', group_id=group.id)
+    return redirect('groups:detail', group_id=group.id)
 

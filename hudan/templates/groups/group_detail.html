@@ -62,16 +62,6 @@
       {% if not current_user.is_admin and not current_user == group.owner and current_user not in group.moderators.all and current_user in group.members.all and current_user %}
       <div class="container mt-5">
         <h2>Become Moderator</h2>
-        <!-- <form method="post" action="{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}">
-          {% csrf_token %}
-          <div class="form-group">
-            {% if current_user not in group.requested_for_moderator.all%}
-              <button type="submit" class="btn btn-primary btn-block">Send Request</button>
-            {% else %}
-              <button type="submit" disabled class="btn btn-primary btn-block">Send Request</button>
-            {% endif %}
-            </div>
-        </form> -->
         <button
         {% if current_user not in group.requested_for_moderator.all%} {%else%} disabled {%endif%}
         type="button" onclick="sendRequest('{% url 'groups:add_moderator_request' group_id=group.id user_id=current_user.id %}')" class="btn btn-primary btn-block">Send Request</button>
@@ -97,16 +87,14 @@
               {% for thread in threads %}
               {% if current_user.is_admin or current_user == group.owner or current_user in group.moderators.all %}
               <!-- Editable thread title -->
-              <div class="thread-title" ondblclick="showEdit(this)">
-                <span class="title-text">Edit title</span>
-                <form action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" style="display: none;">
+              <div class="thread-title">
+                <span class="title-text btn btn-primary btn-block" style="width: 100px;" onclick="showEdit({{thread.id}})">Edit title</span>
+                <form id="edit-form-{{thread.id}}" action="{% url 'groups:threads:edit_thread' group_id=group.id thread_id=thread.id %}" method="post" class="edit-form" id="edit-form-{{thread.id}}" style="display: none;">
                   {% csrf_token %}
                   <input type="text" name="title" value="{{ thread.title }}" class="edit-input" required>
                   <button type="submit" class="btn-update-title">Update Title</button>
-                  <button type="button" onclick="hideEdit(this)" class="btn-cancel-edit">Cancel</button>
+                  <button type="button" onclick="hideEdit({{thread.id}})" class="btn-cancel-edit">Cancel</button>
                 </form>
-                <!-- <a href="{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}" class="btn-delete-thread">Delete thread</a> -->
-                <!-- <button type="button" onclick="sendRequest('{% url 'groups:threads:delete_thread' group_id=group.id thread_id=thread.id %}')" class="btn-delete-thread">Delete thread</button> -->
               </div>
             {% endif %}
             <div class="d-flex align-items-center">
@@ -127,7 +115,7 @@
         {% endif %}
       </div>
 
-      {%if is_user_admin or current_user.is_admin %}
+      {%if is_user_admin or current_user.is_admin or current_user in group.members.all %}
       <div class="container mt-5">
         <h2>Create thread</h2>
         <form
@@ -156,16 +144,7 @@
       {% if not current_user == group.owner and current_user not in group.members.all and current_user %}
       <div class="container mt-5">
         <h2>Become a member of the group!</h2>
-        <!-- <form method="post" action="{% url 'groups:add_member_request' group_id=group.id user_id=current_user.id %}">
-          {% csrf_token %}
-          <div class="form-group">
-            {% if current_user not in group.requested_to_join.all%}
-              <button type="submit" class="btn btn-primary btn-block">Send Request to join group</button>
-            {% else %}
-              <button type="submit" disabled class="btn btn-primary btn-block">Send Request to join group</button>
-            {% endif %}
-          </div>
-        </form> -->
+        
         <button
         {% if current_user not in group.requested_to_join.all%} {%else%} disabled {%endif%}
         type="button" onclick="sendRequest('{% url 'groups:add_member_request' group_id=group.id user_id=current_user.id %}')" class="btn btn-primary btn-block">Send Request to join group</button>
@@ -190,8 +169,7 @@
                   <span>{{ requester.username }}</span>
                 </a>
                 <div>
-                  <!-- <a href="{% url 'groups:approve_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-success btn-sm">Approve</a>
-                  <a href="{% url 'groups:reject_moderator' group_id=group.id user_id=requester.id %}" class="btn btn-danger btn-sm">Reject</a> -->
+                
                   <button type="button" onclick="sendRequest('{% url 'groups:approve_moderator' group_id=group.id user_id=requester.id %}')" class="btn btn-success btn-sm">Approve</button>
                   <button type="button" onclick="sendRequest('{% url 'groups:reject_moderator' group_id=group.id user_id=requester.id %}')" class="btn btn-danger btn-sm">Reject</button>
                 </div>
@@ -203,9 +181,37 @@
           <div class="alert alert-info" role="alert">No moderator requests.</div>
         {% endif %}
       {% endif %}
+
       
       <div class="container mt-5">
-      <h2>List of Moderators</h2>
+        <div class="row">
+            <div class="col d-flex justify-content-between align-items-center">
+                <h2>List of Moderators</h2>
+                <!-- Only show add Mod if the current user is admin  -->
+                {% if current_user.is_admin %}
+                    <button id="addModButton" class="btn btn-primary">Add Moderator</button>
+                {% endif %}
+            </div>
+        </div>
+
+  <!-- Form to Add a New Mod -->
+      {% if error_mod %}
+      <div class="alert alert-danger" role="alert">{{ error_mod }}</div>
+      {% endif %}
+      <div id="addModForm" style="display: none; margin-top: 15px;">
+          <form method="post" action="{% url 'groups:new_mod' group_id=group.id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                  <input type="text" class="form-control" id="new_mod" name="new_mod" placeholder="Enter username" required>
+              </div>
+              <button type="submit" class="btn btn-success">Add</button>
+          </form>
+      </div>
+
+
+
+
+
       <ul>
         {% for mod in group.moderators.all %}
             <li>
@@ -219,8 +225,8 @@
               </a>
 
                 {% if current_user.is_admin or current_user == group.owner %}
-                  <!-- <a href="{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}" class="btn btn-danger btn-sm">Remove</a> -->
-                  <button type="button" onclick="sendRequest('{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}')" class="btn btn-danger btn-sm">Remove</button>
+                  
+                  <button type="button" onclick="sendRequest('{% url 'groups:delete_moderator' group_id=group.id user_id=mod.id %}'); return false " class="btn btn-danger btn-sm">Remove</button>
                   {% endif %}
             </li>
         {% empty %}
@@ -247,8 +253,7 @@
                   <span>{{ requester.username }}</span>
                 </a>
                 <div>
-                  <!-- <a href="{% url 'groups:approve_member' group_id=group.id user_id=requester.id %}" class="btn btn-success btn-sm">Approve</a>
-                  <a href="{% url 'groups:reject_member' group_id=group.id user_id=requester.id %}" class="btn btn-danger btn-sm">Reject</a> -->
+
                   <button type="button" onclick="sendRequest('{% url 'groups:approve_member' group_id=group.id user_id=requester.id %}')" class="btn btn-success btn-sm">Approve</button>
                   <button type="button" onclick="sendRequest('{% url 'groups:reject_member' group_id=group.id user_id=requester.id %}')" class="btn btn-danger btn-sm">Reject</button>
                 </div>
@@ -268,8 +273,8 @@
                 <h2>List of Members</h2>
             </div>
             <div class="col text-right">
-                <!-- Only show add member if the current user is admin or the owner of the group -->
-                {% if current_user.is_admin or current_user == group.owner %}
+                <!-- Only show add member if the current user is admin-->
+                {% if current_user.is_admin %}
                     <button id="addMemberButton" class="btn btn-primary">Add Member</button>
                 {% endif %}
             </div>
@@ -307,7 +312,6 @@
                     </a>
                       {% if current_user.is_admin or current_user == group.owner %}
                         {% if not member == group.owner %}
-                          <!-- <a href="{% url 'groups:delete_member' group_id=group.id user_id=member.id %}" class="btn btn-danger btn-sm">Remove</a> -->
                           <button type="button" onclick="sendRequest('{% url 'groups:delete_member' group_id=group.id user_id=member.id %}')" class="btn btn-danger btn-sm">Remove</button>
                         {%else%}
                                 <span class="badge bg-primary">Owner</span>
@@ -330,6 +334,9 @@
 </div>
 
 </div>
+</div>
+</div>
+</div>
 
 
 <script>
@@ -349,11 +356,13 @@
 <script>
   {% comment %} for showing and hiding the edit form {% endcomment %}
 function showEdit(threadId) {
-  document.getElementById('edit-form-' + threadId).style.display = 'block';
+  var form = document.getElementById('edit-form-' + threadId);
+  form.style.display = 'block';
 }
 
 function hideEdit(threadId) {
-    document.getElementById('edit-form-' + threadId).style.display = 'none';
+  var form = document.getElementById('edit-form-' + threadId);
+  form.style.display = 'none';
 }
 
 function sendRequest(url) {
@@ -374,6 +383,19 @@ function sendRequest(url) {
 </script>
 
 <style>
+  .btn-custom-size {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    color: #ffffff; /* Text color */
+    background-color: #007bff; /* Button color - you can choose your preferred color */
+    border: 1px solid #007bff; /* Border color - same as background for a solid look */
+    border-radius: 5px; /* Rounded corners for the button */
+    cursor: pointer; /* Change cursor on hover to indicate it's clickable */
+    display: inline-block; /* Align with other inline elements */
+    text-align: center; /* Center the text inside the button */
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
+}
+ 
   .thread-title {
   display: flex;
   align-items: center;
