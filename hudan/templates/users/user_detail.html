@@ -57,17 +57,17 @@
                             {% if current_user == profile or current_user.is_admin %}
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:edit' current_user.id %}" class="btn btn-primary btn-block">Edit profile</a>
+                                        <a href="{% url 'users:edit' profile.id %}" class="btn btn-primary btn-block">Edit profile</a>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:change_password' current_user.id %}" class="btn btn-primary btn-block">Change password</a>
+                                        <a href="{% url 'users:change_password' profile.id %}" class="btn btn-primary btn-block">Change password</a>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center mt-3">
                                     <div class="col-md-6">
-                                        <a href="{% url 'users:delete_self' current_user.id %}" class="btn btn-danger btn-block">Delete account</a>
+                                        <a href="{% url 'users:delete_self' profile.id %}" class="btn btn-danger btn-block">Delete account</a>
                                     </div>
                                 </div>
                             {% endif %}
