@@ -31,15 +31,12 @@
 ## Authors and Contributions
 
 - **Kristián Dobeš**  
-  [Email: xdobes22@stud.fit.vutbr.cz](mailto:xdobes22@stud.fit.vutbr.cz)  
   **Contributions:** Developed user profiles, implemented security for profiles and groups, and conducted extensive testing.
 
 - **Ondřej Hráček**  
-  [Email: xhrace08@stud.fit.vutbr.cz](mailto:xhrace08@stud.fit.vutbr.cz)  
   **Contributions:** Designed the database schema, implemented user and group functionalities, managed threads and posts, and handled user authentication.
 
 - **Maroš Synák**  
-  [Email: xsynak03@stud.fit.vutbr.cz](mailto:xsynak03@stud.fit.vutbr.cz)  
   **Contributions:** Developed administration and moderation tools, implemented post and user management, and organized group and thread management.
 
 ---
